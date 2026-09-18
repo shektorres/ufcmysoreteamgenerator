@@ -1,0 +1,1979 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UFC MYSORE MATCHDAY - Team Generator & Match History</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          screens: {
+            'xs': '475px',
+          },
+          colors: {
+            ufcRed: {
+              500: '#dc2626',
+              600: '#b91c1c',
+              700: '#991b1b',
+            },
+            ufcYellow: {
+              400: '#facc15',
+              500: '#eab308',
+              600: '#ca8a04',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Lucide Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #030706;
+      color: #f3f4f6;
+      overflow-x: hidden;
+    }
+
+    /* Prevent mobile browser zoom on input focus */
+    @media screen and (max-width: 768px) {
+      input, select, textarea {
+        font-size: 16px !important;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #08110c;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1b3829;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+
+    .glass-panel {
+      background: rgba(10, 22, 16, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Tactical Soccer Field Styling */
+    .tactical-pitch {
+      background-color: #061e12;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 80%),
+        linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+      position: relative;
+      border: 2px solid rgba(16, 185, 129, 0.4);
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.9);
+    }
+
+    .pitch-line {
+      position: absolute;
+      border: 1.5px solid rgba(255, 255, 255, 0.25);
+      pointer-events: none;
+    }
+
+    @keyframes pulse-swap {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.8); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); }
+    }
+
+    .swap-active {
+      animation: pulse-swap 1.2s infinite;
+      border-color: #f59e0b !important;
+      z-index: 40 !important;
+    }
+
+    .badge-t1 {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.4));
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.5);
+    }
+
+    .badge-t2 {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(79, 70, 229, 0.4));
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.5);
+    }
+
+    .badge-t3 {
+      background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(100, 116, 139, 0.3));
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    /* Admin Restricted Control Utility */
+    .admin-only {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-[#030706] text-slate-100 selection:bg-amber-500 selection:text-black">
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-40 border-b border-emerald-950/80 bg-[#030706]/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-1.5 sm:gap-2">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-2 sm:space-x-3 min-w-0">
+        <img src="WhatsApp Image 2026-09-18 at 16.30.23.jpeg" alt="UFC Mysore Logo" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border border-amber-500/40 shadow-lg shrink-0">
+        <div class="min-w-0 truncate">
+          <h1 class="text-xs sm:text-lg font-black tracking-tight text-white flex items-center gap-1 sm:gap-2 truncate">
+            UFC MYSORE <span class="text-[8px] sm:text-[10px] font-mono font-bold uppercase px-1.5 sm:px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">Engine</span>
+          </h1>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden xs:block truncate">Official Squad Generator & Match Control</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs & Actions -->
+      <div class="flex items-center space-x-1 sm:space-x-2 shrink-0">
+        
+        <!-- Main Navigation Switcher -->
+        <div class="inline-flex p-0.5 sm:p-1 rounded-xl bg-slate-950 border border-slate-800 text-[11px] sm:text-xs font-bold">
+          <button id="navBtnGenerator" onclick="switchMainSection('generator')" class="px-2 sm:px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1 shadow">
+            <i data-lucide="users" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Matchday Setup</span>
+            <span class="sm:hidden">Setup</span>
+          </button>
+          <button id="navBtnHistory" onclick="switchMainSection('history')" class="px-2 sm:px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1">
+            <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Scoreboard & History</span>
+            <span class="sm:hidden">Matches</span>
+          </button>
+        </div>
+
+        <!-- Admin Auth Button -->
+        <button id="adminAuthBtn" onclick="handleAdminAuthClick()" class="px-2 sm:px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 transition flex items-center gap-1 sm:gap-1.5 shadow-sm">
+          <i id="adminAuthIcon" data-lucide="lock" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400"></i>
+          <span id="adminAuthLabel" class="hidden sm:inline">Admin Login</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-6">
+
+    <!-- SECTION 1: MATCHDAY SETUP & TEAM GENERATOR -->
+    <div id="sectionGenerator" class="block space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Attendance Checklist (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col space-y-4">
+          <div class="glass-panel rounded-2xl p-3.5 sm:p-5 shadow-2xl flex flex-col h-full border border-emerald-950/60">
+            
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-800 gap-2">
+              <div>
+                <h2 class="text-xs sm:text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <i data-lucide="user-check" class="w-4 h-4 text-amber-400"></i>
+                  Squad Attendance
+                </h2>
+                <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Toggle available players for matchday setup</p>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <button onclick="openRosterModal()" class="admin-only px-2 py-1 rounded-full text-xs font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition flex items-center gap-1">
+                  <i data-lucide="edit" class="w-3 h-3"></i> Edit Roster
+                </button>
+                <span id="attendanceBadge" class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                  14 / 21 Playing
+                </span>
+              </div>
+            </div>
+
+            <!-- Controls & Search -->
+            <div class="py-3 space-y-2.5">
+              <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                <button onclick="quickSelect(14)" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition flex items-center gap-1">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i> Select 14
+                </button>
+                <button onclick="selectAll()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition font-semibold">
+                  Select All
+                </button>
+                <button onclick="clearAll()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-red-400 border border-slate-800 transition font-semibold">
+                  Clear
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1 min-w-0">
+                  <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500 pointer-events-none"></i>
+                  <input type="text" id="attendanceSearch" oninput="renderAttendanceList()" placeholder="Search player..." class="w-full pl-8 pr-3 py-1.5 text-xs sm:text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+                <select id="attendancePosFilter" onchange="renderAttendanceList()" class="bg-slate-950 border border-slate-800 text-xs sm:text-xs text-slate-300 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 shrink-0">
+                  <option value="ALL">All Positions</option>
+                  <option value="GK">GK (Goalkeeper)</option>
+                  <option value="DEF">DEF (Defender)</option>
+                  <option value="MID">MID (Midfielder)</option>
+                  <option value="ATT">ATT (Attacker)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Player Checklist Scroll Area -->
+            <div id="attendanceList" class="flex-1 overflow-y-auto max-h-[420px] min-h-[250px] pr-1 space-y-1.5">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Generate Teams Action Button -->
+            <div class="pt-3.5 mt-2 border-t border-slate-800">
+              <button onclick="generateBalancedTeams()" class="w-full py-3 sm:py-3.5 px-4 rounded-xl bg-gradient-to-r from-red-700 via-amber-600 to-amber-500 hover:from-red-600 hover:to-amber-400 text-slate-950 font-black text-xs sm:text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-[0.99] border border-amber-300/40">
+                <i data-lucide="sparkles" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-950"></i>
+                <span class="tracking-wide uppercase">Generate Balanced Teams</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right Column: Pitch Visualizer & Roster (7 Cols) -->
+        <div class="lg:col-span-7 flex flex-col space-y-4">
+          
+          <!-- Tactical Pitch Banner Header -->
+          <div class="glass-panel rounded-2xl p-3.5 sm:p-5 shadow-2xl border border-emerald-950/60">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span id="fairnessBadge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                    98% Balanced
+                  </span>
+                </div>
+                <h3 class="text-sm sm:text-base font-black text-white mt-1.5 flex items-center gap-2">
+                  <span class="text-red-500">UFC Mysore Red</span>
+                  <span class="text-xs text-slate-500 font-normal">VS</span>
+                  <span class="text-amber-400">UFC Mysore Yellow</span>
+                </h3>
+              </div>
+
+              <!-- Controls -->
+              <div class="flex items-center gap-2">
+                <button onclick="generateBalancedTeams()" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-800 text-xs font-bold flex items-center gap-1.5 transition">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>Reshuffle</span>
+                </button>
+                <button onclick="openExportModal()" class="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5 transition">
+                  <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+                  <span>WhatsApp Format</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Position Breakdown -->
+            <div class="pt-3.5 grid grid-cols-3 gap-2 text-center">
+              <div class="glass-card rounded-xl p-2">
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Defenders</p>
+                <div class="flex items-center justify-center gap-1.5 mt-0.5">
+                  <span id="defRed" class="text-xs font-bold text-red-400 font-mono">0</span>
+                  <span class="text-xs text-slate-600">:</span>
+                  <span id="defYellow" class="text-xs font-bold text-amber-400 font-mono">0</span>
+                </div>
+              </div>
+
+              <div class="glass-card rounded-xl p-2">
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Midfielders</p>
+                <div class="flex items-center justify-center gap-1.5 mt-0.5">
+                  <span id="midRed" class="text-xs font-bold text-red-400 font-mono">0</span>
+                  <span class="text-xs text-slate-600">:</span>
+                  <span id="midYellow" class="text-xs font-bold text-amber-400 font-mono">0</span>
+                </div>
+              </div>
+
+              <div class="glass-card rounded-xl p-2">
+                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Attackers</p>
+                <div class="flex items-center justify-center gap-1.5 mt-0.5">
+                  <span id="attRed" class="text-xs font-bold text-red-400 font-mono">0</span>
+                  <span class="text-xs text-slate-600">:</span>
+                  <span id="attYellow" class="text-xs font-bold text-amber-400 font-mono">0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Manual Player Swap Banner -->
+            <div id="swapBanner" class="hidden mt-3 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between">
+              <span class="flex items-center gap-2">
+                <i data-lucide="arrow-left-right" class="w-4 h-4 text-amber-400"></i>
+                <span id="swapText">Select another player card to complete swap.</span>
+              </span>
+              <button onclick="cancelSwapSelection()" class="text-xs font-bold underline hover:text-white">Cancel</button>
+            </div>
+          </div>
+
+          <!-- Mode Tabs -->
+          <div class="flex items-center justify-between">
+            <div class="inline-flex p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold">
+              <button id="tabBtnPitch" onclick="switchTab('pitch')" class="px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1.5 shadow">
+                <i data-lucide="layout" class="w-3.5 h-3.5"></i> Tactical Pitch
+              </button>
+              <button id="tabBtnList" onclick="switchTab('list')" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5">
+                <i data-lucide="list-ordered" class="w-3.5 h-3.5"></i> Squad Cards
+              </button>
+            </div>
+            <span class="text-[10px] sm:text-[11px] text-slate-500">💡 Tap any player card to swap</span>
+          </div>
+
+          <!-- VIEW 1: TACTICAL PITCH VIEW -->
+          <div id="viewPitch" class="block">
+            <div class="tactical-pitch rounded-2xl p-3 sm:p-5 min-h-[480px] sm:min-h-[520px] flex flex-col justify-between overflow-hidden relative border border-emerald-900/60 shadow-2xl">
+              
+              <!-- Pitch Markings -->
+              <div class="pitch-line left-0 right-0 top-1/2 -translate-y-1/2 border-t-2 border-white/20"></div>
+              <div class="pitch-line w-28 h-28 sm:w-36 sm:h-36 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-white/20"></div>
+              <div class="pitch-line w-44 sm:w-60 h-16 sm:h-20 top-0 left-1/2 -translate-x-1/2 border-b-2 border-x-2 border-white/20 rounded-b-xl"></div>
+              <div class="pitch-line w-44 sm:w-60 h-16 sm:h-20 bottom-0 left-1/2 -translate-x-1/2 border-t-2 border-x-2 border-white/20 rounded-t-xl"></div>
+
+              <div class="relative z-10 flex flex-col justify-between h-full min-h-[450px] sm:min-h-[480px]">
+                
+                <!-- TEAM RED (TOP HALF) -->
+                <div class="flex-1 flex flex-col justify-between pb-2">
+                  <div class="flex items-center justify-between px-2">
+                    <span class="text-xs font-black tracking-wider uppercase text-red-500 flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-red-600 inline-block shadow-sm shadow-red-500"></span>
+                      UFC Mysore Red
+                    </span>
+                    <span id="formationRed" class="text-[11px] text-slate-400 font-mono font-bold">0</span>
+                  </div>
+
+                  <div class="flex-1 flex flex-col justify-around py-1">
+                    <div id="pitchRedGK" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center min-h-[28px]"></div>
+                    <div id="pitchRedDEF" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                    <div id="pitchRedMID" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                    <div id="pitchRedATT" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                  </div>
+                </div>
+
+                <!-- Center Field Divider Line -->
+                <div class="relative z-20 my-1"></div>
+
+                <!-- TEAM YELLOW (BOTTOM HALF) -->
+                <div class="flex-1 flex flex-col justify-between pt-2">
+                  <div class="flex-1 flex flex-col justify-around py-1">
+                    <div id="pitchYellowATT" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                    <div id="pitchYellowMID" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                    <div id="pitchYellowDEF" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center"></div>
+                    <div id="pitchYellowGK" class="flex flex-wrap justify-center gap-1.5 sm:gap-3 items-center min-h-[28px]"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between px-2">
+                    <span class="text-xs font-black tracking-wider uppercase text-amber-400 flex items-center gap-2">
+                      <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block shadow-sm shadow-amber-400"></span>
+                      UFC Mysore Yellow
+                    </span>
+                    <span id="formationYellow" class="text-[11px] text-slate-400 font-mono font-bold">0</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Substitutes Bench Pool -->
+            <div class="mt-4 glass-panel rounded-2xl p-3.5 sm:p-4 border border-slate-800">
+              <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                  <i data-lucide="user-minus" class="w-4 h-4"></i>
+                  Substitutes / Bench Pool (<span id="benchCount">0</span>)
+                </h4>
+                <span class="text-[10px] text-slate-500">Tap bench player to swap into active match</span>
+              </div>
+              <div id="benchList" class="mt-3 flex flex-wrap gap-2">
+                <!-- Rendered dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 2: SQUAD CARDS LIST -->
+          <div id="viewList" class="hidden space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Team Red Container -->
+              <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-red-600 shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <h4 class="font-black text-red-500 flex items-center gap-2 text-sm">
+                    <span class="w-3 h-3 rounded-full bg-red-600"></span>
+                    UFC Mysore Red
+                  </h4>
+                  <span id="listSkillRed" class="text-xs font-bold text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"></span>
+                </div>
+                <div id="listRedContainer" class="mt-3 space-y-2"></div>
+              </div>
+
+              <!-- Team Yellow Container -->
+              <div class="glass-panel rounded-2xl p-4 border-l-4 border-l-amber-500 shadow-xl">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <h4 class="font-black text-amber-400 flex items-center gap-2 text-sm">
+                    <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                    UFC Mysore Yellow
+                  </h4>
+                  <span id="listSkillYellow" class="text-xs font-bold text-slate-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800"></span>
+                </div>
+                <div id="listYellowContainer" class="mt-3 space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: SCOREBOARD, GOALSCORERS & MATCH HISTORY -->
+    <div id="sectionHistory" class="hidden space-y-6">
+      
+      <!-- Live Scoreboard & Event Panel -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl border border-emerald-950/60 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <h2 class="text-base sm:text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="trophy" class="w-5 h-5 text-amber-400"></i>
+              Matchday Scoreboard
+            </h2>
+            <p class="text-xs text-slate-400">Live scoreboard, goals, and official results</p>
+          </div>
+
+          <!-- Match Date Selector -->
+          <div class="flex items-center gap-2 bg-slate-950 p-2 rounded-xl border border-slate-800">
+            <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+            <span class="text-xs font-bold text-slate-400">Match Date:</span>
+            <input type="date" id="matchDateControl" onchange="syncMatchDate(this.value)" class="admin-only bg-transparent text-amber-300 font-mono text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark]">
+            <span id="matchDateDisplay" class="text-amber-300 font-mono text-xs font-bold"></span>
+          </div>
+        </div>
+
+        <!-- Scoreboard Display Card -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 items-center">
+          
+          <!-- Team Red Score Panel -->
+          <div class="md:col-span-5 glass-card p-4 sm:p-5 rounded-2xl border border-red-900/40 text-center space-y-3">
+            <span class="text-xs font-black uppercase text-red-500 tracking-wider flex items-center justify-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-red-600"></span> UFC Mysore Red
+            </span>
+            <div id="scoreDisplayRed" class="text-4xl sm:text-5xl font-black text-red-500 font-mono">0</div>
+            
+            <!-- ADMIN ONLY SCORE CONTROLS -->
+            <div class="admin-only flex items-center justify-center gap-2">
+              <button onclick="changeScore('red', 1)" class="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-black text-xs sm:text-sm shadow flex items-center gap-1">
+                + Goal
+              </button>
+              <button onclick="changeScore('red', -1)" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs sm:text-sm">
+                - Decrease
+              </button>
+            </div>
+
+            <!-- Goalscorers Display & Logging -->
+            <div class="pt-3 border-t border-slate-800 space-y-2">
+              <div class="admin-only space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Goalscorer (Red)</label>
+                <div class="flex gap-2">
+                  <select id="selectRedGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
+                    <option value="">Select Red Player...</option>
+                  </select>
+                  <button onclick="addGoalscorer('red')" class="px-3 py-1.5 bg-red-600/30 hover:bg-red-600/50 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Goalscorers (Red)</p>
+              <div id="redGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
+                <!-- Logged Red Goalscorers -->
+              </div>
+            </div>
+          </div>
+
+          <!-- VS Divider & Admin Save Action -->
+          <div class="md:col-span-2 text-center space-y-2 sm:space-y-3">
+            <div class="text-lg sm:text-xl font-black text-slate-600 font-mono">VS</div>
+            <div class="admin-only">
+              <button onclick="saveMatchToHistory()" class="w-full py-2.5 sm:py-3 px-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black rounded-xl text-xs uppercase tracking-wider shadow-xl transition flex items-center justify-center gap-1.5">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                Save Match Log
+              </button>
+            </div>
+          </div>
+
+          <!-- Team Yellow Score Panel -->
+          <div class="md:col-span-5 glass-card p-4 sm:p-5 rounded-2xl border border-amber-900/40 text-center space-y-3">
+            <span class="text-xs font-black uppercase text-amber-400 tracking-wider flex items-center justify-center gap-1.5">
+              <span class="w-3 h-3 rounded-full bg-amber-400"></span> UFC Mysore Yellow
+            </span>
+            <div id="scoreDisplayYellow" class="text-4xl sm:text-5xl font-black text-amber-400 font-mono">0</div>
+
+            <!-- ADMIN ONLY SCORE CONTROLS -->
+            <div class="admin-only flex items-center justify-center gap-2">
+              <button onclick="changeScore('yellow', 1)" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-black text-xs sm:text-sm shadow flex items-center gap-1">
+                + Goal
+              </button>
+              <button onclick="changeScore('yellow', -1)" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold text-xs sm:text-sm">
+                - Decrease
+              </button>
+            </div>
+
+            <!-- Goalscorers Display & Logging -->
+            <div class="pt-3 border-t border-slate-800 space-y-2">
+              <div class="admin-only space-y-2">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Goalscorer (Yellow)</label>
+                <div class="flex gap-2">
+                  <select id="selectYellowGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Select Yellow Player...</option>
+                  </select>
+                  <button onclick="addGoalscorer('yellow')" class="px-3 py-1.5 bg-amber-500/30 hover:bg-amber-500/50 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Goalscorers (Yellow)</p>
+              <div id="yellowGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
+                <!-- Logged Yellow Goalscorers -->
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PLAYER LEADERBOARD PROMPT BANNER -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 shadow-xl border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gradient-to-r from-amber-500/10 via-slate-950 to-slate-950">
+        <div class="flex items-center space-x-3 text-center sm:text-left">
+          <div class="p-3 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0 mx-auto sm:mx-0">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-black text-white">Player Records & Career Leaderboard</h3>
+            <p class="text-xs text-slate-400 mt-0.5">View individual goals, matches played, win rate, and goal difference</p>
+          </div>
+        </div>
+
+        <button onclick="openPlayerLeaderboardModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2 transition active:scale-[0.98]">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>View Statistics</span>
+        </button>
+      </div>
+
+      <!-- MATCH HISTORY LOG ARCHIVE -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-5 h-5 text-amber-400"></i>
+              Full Match History & Records
+            </h3>
+            <p class="text-xs text-slate-400">Archived game results, scores, and goalscorer statistics</p>
+          </div>
+          <!-- Admin Only Clear History Button -->
+          <button onclick="clearMatchHistory()" class="admin-only text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Clear History
+          </button>
+        </div>
+
+        <div id="matchHistoryContainer" class="space-y-3">
+          <!-- Rendered Dynamically -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MODAL: PLAYER RECORDS & CAREER LEADERBOARD -->
+  <div id="playerLeaderboardModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-5">
+    <div class="glass-panel w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-[92vh] overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-3.5 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/90">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
+            Player Records & Career Statistics
+          </h3>
+          <p class="text-[11px] sm:text-xs text-slate-400">Alphabetically sorted; synced live with recorded match history</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="openPlayerStatsModal()" class="admin-only px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-1.5">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> Edit Base Stats
+          </button>
+          <button onclick="closePlayerLeaderboardModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Search inside Modal for Mobile Convenience -->
+      <div class="p-3 sm:p-4 bg-slate-950/60 border-b border-slate-800/80 flex items-center justify-between gap-3">
+        <div class="relative flex-1 sm:max-w-xs min-w-0">
+          <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500 pointer-events-none"></i>
+          <input type="text" id="leaderboardSearch" oninput="renderPlayerHistory()" placeholder="Filter player stats..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+        </div>
+        <span class="text-[11px] text-slate-500 hidden sm:inline">📊 Sorted A to Z</span>
+      </div>
+
+      <!-- Modal Body Scrollable Table Container -->
+      <div class="p-3 sm:p-5 overflow-y-auto flex-1">
+        <div class="overflow-x-auto rounded-xl border border-slate-800/80">
+          <table class="w-full text-left text-xs text-slate-300 min-w-[580px]">
+            <thead class="bg-slate-950 text-[11px] uppercase tracking-wider text-slate-400 font-mono border-b border-slate-800 sticky top-0 z-10 shadow-sm">
+              <tr>
+                <th class="py-3 px-3">Player</th>
+                <th class="py-3 px-3">Pos</th>
+                <th class="py-3 px-3 text-center">Matches Played (MP)</th>
+                <th class="py-3 px-3 text-center">Wins (W)</th>
+                <th class="py-3 px-3 text-center text-amber-400">Individual Goals</th>
+                <th class="py-3 px-3 text-center">Team Goals (GF)</th>
+                <th class="py-3 px-3 text-center">Team Conceded (GA)</th>
+                <th class="py-3 px-3 text-center">Goal Diff (GD)</th>
+              </tr>
+            </thead>
+            <tbody id="playerHistoryTableBody" class="divide-y divide-slate-800/60 font-medium">
+              <!-- Rendered Dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="p-3 sm:p-4 border-t border-slate-800 bg-slate-900/90 flex justify-between items-center text-xs text-slate-400">
+        <span>Click anywhere outside to exit</span>
+        <button onclick="closePlayerLeaderboardModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition">
+          Close Window
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN LOGIN PASSWORD -->
+  <div id="adminLoginModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-sm rounded-2xl shadow-2xl border border-slate-800 p-5 sm:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+          <i data-lucide="shield-lock" class="w-5 h-5 text-amber-400"></i>
+          Administrator Access
+        </h3>
+        <button onclick="closeAdminLoginModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-400">Enter administrator password to manage roster matrix, edit scoreboard, and update player statistics.</p>
+
+      <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+        <div>
+          <input type="password" id="adminPasswordInput" required placeholder="Enter admin password" class="w-full px-3.5 py-2 text-xs sm:text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+          <p id="adminLoginError" class="text-[11px] text-red-400 font-bold mt-1.5 hidden">Incorrect password. Please try again.</p>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition shadow">
+          Authenticate & Unlock
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMINISTRATOR ROSTER & MATRIX MANAGER -->
+  <div id="rosterModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-panel w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-5 h-5 text-amber-400"></i>
+            Administrator Squad Matrix & Roster Editor
+          </h3>
+          <p class="text-xs text-slate-400">Edit player names, tiers, positions, availability & backup data</p>
+        </div>
+        <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Add New Player Panel -->
+      <div class="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/40 space-y-3">
+        <h4 class="text-xs uppercase tracking-wider font-bold text-slate-300 flex items-center gap-1.5">
+          <i data-lucide="user-plus" class="w-4 h-4 text-amber-400"></i> Add New Squad Member
+        </h4>
+        <form id="addPlayerForm" onsubmit="handleAddPlayer(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+          <div class="sm:col-span-5">
+            <input type="text" id="newPlayerName" required placeholder="Player Full Name" class="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+          </div>
+          <div class="sm:col-span-3">
+            <select id="newPlayerPos" required class="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+              <option value="DEF">Defender (DEF)</option>
+              <option value="MID">Midfielder (MID)</option>
+              <option value="ATT">Attacker (ATT)</option>
+              <option value="GK">Goalkeeper (GK)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-3">
+            <select id="newPlayerTier" required class="w-full px-3 py-2 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+              <option value="1">⭐ Tier 1 (3 pts)</option>
+              <option value="2" selected>⚡ Tier 2 (2 pts)</option>
+              <option value="3">🔷 Tier 3 (1 pt)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-1 flex items-center">
+            <button type="submit" class="w-full py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center transition shadow">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Roster Matrix Table -->
+      <div class="p-4 sm:p-5 overflow-y-auto flex-1 space-y-3">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs uppercase tracking-wider font-bold text-slate-400">
+            Squad Members (<span id="rosterCount">21</span> Players)
+          </h4>
+          <div class="flex items-center gap-2">
+            <button onclick="exportRosterJSON()" class="text-xs text-amber-400 hover:text-amber-300 font-semibold flex items-center gap-1">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Export JSON
+            </button>
+            <span class="text-slate-700">|</span>
+            <button onclick="promptResetRoster()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset Default Squad
+            </button>
+          </div>
+        </div>
+
+        <div id="rosterTable" class="space-y-2"></div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex justify-between items-center">
+        <span class="text-xs text-slate-400">Changes auto-save locally to browser storage.</span>
+        <button onclick="closeRosterModal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition">
+          Save & Apply
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: ADMIN PLAYER STATS EDITOR -->
+  <div id="playerStatsModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+    <div class="glass-panel w-full max-w-4xl rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div>
+          <h3 class="text-sm sm:text-base font-extrabold text-white flex items-center gap-2">
+            <i data-lucide="user-check" class="w-5 h-5 text-amber-400"></i>
+            Admin Player Base Statistics Editor
+          </h3>
+          <p class="text-xs text-slate-400">Manually adjust total career targets (base offsets are calculated to maintain sync with match history)</p>
+        </div>
+        <button onclick="closePlayerStatsModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto flex-1">
+        <div id="adminPlayerStatsTable" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex justify-between items-center">
+        <span class="text-xs text-slate-400">Changes update live player history records.</span>
+        <button onclick="saveAdminPlayerStats()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition">
+          Save Statistics
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: WHATSAPP EXPORT -->
+  <div id="exportModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-lg rounded-2xl shadow-2xl border border-slate-700 flex flex-col max-h-[90vh] overflow-hidden">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-900/70">
+        <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="share-2" class="w-5 h-5 text-amber-400"></i>
+          WhatsApp Match Lineup Format
+        </h3>
+        <button onclick="closeExportModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto flex-1">
+        <textarea id="exportTextarea" readonly class="w-full h-64 p-3.5 bg-slate-950 border border-slate-800 rounded-xl font-mono text-xs text-slate-200 focus:outline-none resize-none leading-relaxed"></textarea>
+      </div>
+
+      <div class="p-4 border-t border-slate-800 bg-slate-900/70 flex items-center justify-between">
+        <span id="toastMessage" class="text-xs text-emerald-400 font-bold opacity-0 transition-opacity flex items-center gap-1">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i> Copied to Clipboard!
+        </span>
+        <div class="flex items-center gap-2">
+          <button onclick="closeExportModal()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">
+            Close
+          </button>
+          <button onclick="executeCopyText()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs flex items-center gap-1.5 shadow">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            Copy Text
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMATION DIALOG -->
+  <div id="confirmModal" class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="glass-panel w-full max-w-md rounded-2xl shadow-2xl border border-slate-800 p-6 space-y-4 text-center">
+      <div class="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 flex items-center justify-center mx-auto">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 id="confirmTitle" class="text-base font-extrabold text-white">Reset Squad?</h3>
+      <p id="confirmText" class="text-xs text-slate-400">Are you sure you want to reset all players back to default UFC Mysore setup?</p>
+      
+      <div class="flex items-center justify-center gap-3 pt-2">
+        <button onclick="closeConfirmModal(false)" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">
+          Cancel
+        </button>
+        <button onclick="closeConfirmModal(true)" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold">
+          Confirm Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Official Roster Data for UFC Mysore with Career Stats Schema
+    const DEFAULT_ROSTER = [
+      { id: '1', name: 'Joel', position: 'GK', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '2', name: 'Adithya', position: 'GK', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '3', name: 'Arun', position: 'DEF', tier: 1, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '4', name: 'Deeraj', position: 'DEF', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '5', name: 'Abrar', position: 'DEF', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '6', name: 'Thahir', position: 'DEF', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '7', name: 'Abin', position: 'DEF', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '8', name: 'Abhiram', position: 'DEF', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '9', name: 'Shekar', position: 'DEF', tier: 3, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '10', name: 'Amaljith', position: 'DEF', tier: 3, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '11', name: 'Basil', position: 'DEF', tier: 3, selected: false, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '12', name: 'Prithvi', position: 'MID', tier: 1, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '13', name: 'Adway', position: 'MID', tier: 1, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '14', name: 'Ashik', position: 'MID', tier: 3, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '15', name: 'Hayagrive', position: 'MID', tier: 3, selected: false, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '16', name: 'Mithun', position: 'ATT', tier: 1, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '17', name: 'Sunil', position: 'ATT', tier: 1, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '18', name: 'Jasir', position: 'ATT', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '19', name: 'Kesavan', position: 'ATT', tier: 2, selected: false, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '20', name: 'Jishnu', position: 'ATT', tier: 2, selected: false, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
+      { id: '21', name: 'Shibil', position: 'ATT', tier: 3, selected: false, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 }
+    ];
+
+    const TIER_POINTS = { 1: 3, 2: 2, 3: 1 };
+    const TIER_BADGES = {
+      1: '<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold badge-t1">⭐ T1</span>',
+      2: '<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold badge-t2">⚡ T2</span>',
+      3: '<span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold badge-t3">🔷 T3</span>'
+    };
+
+    let players = [];
+    let teamRed = [];
+    let teamYellow = [];
+    let bench = [];
+    let swapSelectedId = null;
+    let confirmCallback = null;
+
+    // Admin State & Password
+    let isAdmin = false;
+    const ADMIN_PASSWORD = "admins@123";
+
+    // Match Score, Goalscorers & History
+    let scoreRed = 0;
+    let scoreYellow = 0;
+    let redGoalscorers = [];
+    let yellowGoalscorers = [];
+    let selectedMatchDate = new Date().toISOString().split('T')[0];
+    let matchHistory = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('matchDateControl').value = selectedMatchDate;
+      updateMatchDateDisplay();
+
+      loadRoster();
+      loadMatchHistory();
+      renderAttendanceList();
+      generateBalancedTeams();
+      updateAdminUIState();
+      renderPlayerHistory();
+      renderMatchHistory();
+      lucide.createIcons();
+    });
+
+    function openPlayerLeaderboardModal() {
+      document.getElementById('playerLeaderboardModal').classList.remove('hidden');
+      renderPlayerHistory();
+    }
+
+    function closePlayerLeaderboardModal() {
+      document.getElementById('playerLeaderboardModal').classList.add('hidden');
+    }
+
+    function openRosterModal() {
+      document.getElementById('rosterModal').classList.remove('hidden');
+      renderRosterTable();
+    }
+
+    function closeRosterModal() {
+      document.getElementById('rosterModal').classList.add('hidden');
+    }
+
+    function switchMainSection(sec) {
+      document.getElementById('sectionGenerator').classList.add('hidden');
+      document.getElementById('sectionHistory').classList.add('hidden');
+
+      document.getElementById('navBtnGenerator').className = "px-2 sm:px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1";
+      document.getElementById('navBtnHistory').className = "px-2 sm:px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1";
+
+      if (sec === 'generator') {
+        document.getElementById('sectionGenerator').classList.remove('hidden');
+        document.getElementById('navBtnGenerator').className = "px-2 sm:px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1 shadow";
+      } else {
+        document.getElementById('sectionHistory').classList.remove('hidden');
+        document.getElementById('navBtnHistory').className = "px-2 sm:px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1 shadow";
+        populateGoalscorerDropdowns();
+        renderPlayerHistory();
+      }
+    }
+
+    function syncMatchDate(val) {
+      selectedMatchDate = val;
+      updateMatchDateDisplay();
+    }
+
+    function updateMatchDateDisplay() {
+      if (!selectedMatchDate) return;
+      const parts = selectedMatchDate.split('-');
+      const d = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date();
+      const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      document.getElementById('matchDateDisplay').textContent = dateStr;
+    }
+
+    /* ADMIN AUTHENTICATION CONTROLS */
+    function handleAdminAuthClick() {
+      if (isAdmin) {
+        isAdmin = false;
+        updateAdminUIState();
+        renderAttendanceList();
+        renderAllViews();
+        renderMatchHistory();
+        renderPlayerHistory();
+      } else {
+        openAdminLoginModal();
+      }
+    }
+
+    function openAdminLoginModal() {
+      document.getElementById('adminPasswordInput').value = '';
+      document.getElementById('adminLoginError').classList.add('hidden');
+      document.getElementById('adminLoginModal').classList.remove('hidden');
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value;
+      if (pwd === ADMIN_PASSWORD) {
+        isAdmin = true;
+        closeAdminLoginModal();
+        updateAdminUIState();
+        renderAttendanceList();
+        renderAllViews();
+        renderMatchHistory();
+        renderPlayerHistory();
+      } else {
+        document.getElementById('adminLoginError').classList.remove('hidden');
+      }
+    }
+
+    function updateAdminUIState() {
+      const btnLabel = document.getElementById('adminAuthLabel');
+      const btnIcon = document.getElementById('adminAuthIcon');
+      const btn = document.getElementById('adminAuthBtn');
+
+      if (isAdmin) {
+        btnLabel.textContent = "Admin Active";
+        btn.className = "px-2 sm:px-3 py-1.5 text-xs font-bold rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition flex items-center gap-1 sm:gap-1.5 shadow-sm";
+        btnIcon.setAttribute('data-lucide', 'unlock');
+      } else {
+        btnLabel.textContent = "Admin Login";
+        btn.className = "px-2 sm:px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 transition flex items-center gap-1 sm:gap-1.5 shadow-sm";
+        btnIcon.setAttribute('data-lucide', 'lock');
+      }
+
+      // Show / Hide Admin Exclusive UI Elements
+      const adminElements = document.querySelectorAll('.admin-only');
+      adminElements.forEach(el => {
+        if (isAdmin) {
+          el.style.setProperty('display', 'inline-flex', 'important');
+          if (el.tagName === 'DIV' && !el.classList.contains('flex')) {
+            el.style.setProperty('display', 'block', 'important');
+          }
+        } else {
+          el.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      lucide.createIcons();
+    }
+
+    function loadRoster() {
+      const saved = localStorage.getItem('ufc_mysore_roster_yellow_v2');
+      if (saved) {
+        try {
+          const loaded = JSON.parse(saved);
+          players = loaded.map(p => ({
+            baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0,
+            ...p
+          }));
+        } catch (e) {
+          players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+        }
+      } else {
+        players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+        saveRoster();
+      }
+      updateAttendanceBadge();
+    }
+
+    function saveRoster() {
+      localStorage.setItem('ufc_mysore_roster_yellow_v2', JSON.stringify(players));
+      updateAttendanceBadge();
+    }
+
+    function updateAttendanceBadge() {
+      const sel = players.filter(p => p.selected).length;
+      document.getElementById('attendanceBadge').textContent = `${sel} / ${players.length} Playing`;
+      document.getElementById('rosterCount').textContent = players.length;
+    }
+
+    function renderAttendanceList() {
+      const container = document.getElementById('attendanceList');
+      const query = document.getElementById('attendanceSearch').value.toLowerCase().trim();
+      const posFilter = document.getElementById('attendancePosFilter').value;
+
+      const filtered = players.filter(p => {
+        const matchName = p.name.toLowerCase().includes(query);
+        const matchPos = posFilter === 'ALL' || p.position === posFilter;
+        return matchName && matchPos;
+      });
+
+      const posRank = { GK: 1, DEF: 2, MID: 3, ATT: 4 };
+      filtered.sort((a, b) => posRank[a.position] - posRank[b.position] || a.tier - b.tier || a.name.localeCompare(b.name));
+
+      container.innerHTML = '';
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-xs text-slate-500">No matching players found</div>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = `p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition ${
+          p.selected 
+            ? 'bg-slate-900/90 border border-amber-900/50 hover:border-amber-500/50' 
+            : 'bg-slate-950/40 border border-transparent text-slate-500 hover:bg-slate-900/40'
+        }`;
+
+        item.onclick = (e) => {
+          if (e.target.tagName !== 'INPUT') {
+            toggleAttendance(p.id);
+          }
+        };
+
+        const posStyle = {
+          GK: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+          DEF: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+          MID: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+          ATT: 'bg-red-500/20 text-red-300 border-red-500/30'
+        }[p.position];
+
+        const tierBadgeHTML = isAdmin ? TIER_BADGES[p.tier] : '';
+
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-xs ${p.selected ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${posStyle}">${p.position}</span>
+            </div>
+          </div>
+          <div>
+            ${tierBadgeHTML}
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    function toggleAttendance(id) {
+      const p = players.find(x => x.id === id);
+      if (p) {
+        p.selected = !p.selected;
+        saveRoster();
+        renderAttendanceList();
+        generateBalancedTeams();
+      }
+    }
+
+    function quickSelect(count) {
+      players.forEach(p => p.selected = false);
+      const gks = players.filter(p => p.position === 'GK').slice(0, 2);
+      gks.forEach(p => p.selected = true);
+
+      let needed = count - gks.length;
+      const defs = players.filter(p => p.position === 'DEF');
+      const mids = players.filter(p => p.position === 'MID');
+      const atts = players.filter(p => p.position === 'ATT');
+
+      const priority = [...defs.slice(0, 5), ...mids.slice(0, 3), ...atts.slice(0, 4)];
+      for (let i = 0; i < priority.length && needed > 0; i++) {
+        priority[i].selected = true;
+        needed--;
+      }
+
+      if (needed > 0) {
+        players.filter(p => !p.selected).slice(0, needed).forEach(p => p.selected = true);
+      }
+
+      saveRoster();
+      renderAttendanceList();
+      generateBalancedTeams();
+    }
+
+    function selectAll() {
+      players.forEach(p => p.selected = true);
+      saveRoster();
+      renderAttendanceList();
+      generateBalancedTeams();
+    }
+
+    function clearAll() {
+      players.forEach(p => p.selected = false);
+      saveRoster();
+      renderAttendanceList();
+      generateBalancedTeams();
+    }
+
+    function generateBalancedTeams() {
+      const selected = players.filter(p => p.selected);
+
+      if (selected.length < 2) {
+        teamRed = [...selected];
+        teamYellow = [];
+        bench = [];
+        renderAllViews();
+        return;
+      }
+
+      let activePool = [...selected];
+      let benchPool = [];
+
+      if (selected.length > 14) {
+        const gks = selected.filter(p => p.position === 'GK');
+        const outfield = selected.filter(p => p.position !== 'GK');
+        activePool = [...gks, ...outfield.slice(0, 14 - gks.length)];
+        benchPool = outfield.slice(14 - gks.length);
+      }
+
+      const N = activePool.length;
+      const sizeA = Math.floor(N / 2);
+
+      let bestSplit = null;
+      let minCost = Infinity;
+
+      for (let i = 0; i < 12000; i++) {
+        const shuffled = [...activePool].sort(() => Math.random() - 0.5);
+        const candidateA = shuffled.slice(0, sizeA);
+        const idsA = new Set(candidateA.map(p => p.id));
+        const candidateB = activePool.filter(p => !idsA.has(p.id));
+
+        const gkA = candidateA.filter(p => p.position === 'GK').length;
+        const gkB = candidateB.filter(p => p.position === 'GK').length;
+        let gkPenalty = (gkA + gkB >= 2) ? Math.abs(gkA - gkB) * 10000 : 0;
+
+        const skillA = candidateA.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
+        const skillB = candidateB.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
+        const skillDiff = Math.abs(skillA - skillB);
+
+        const defA = candidateA.filter(p => p.position === 'DEF').length;
+        const defB = candidateB.filter(p => p.position === 'DEF').length;
+        const midA = candidateA.filter(p => p.position === 'MID').length;
+        const midB = candidateB.filter(p => p.position === 'MID').length;
+        const attA = candidateA.filter(p => p.position === 'ATT').length;
+        const attB = candidateB.filter(p => p.position === 'ATT').length;
+
+        const posDiff = Math.abs(defA - defB) + Math.abs(midA - midB) + Math.abs(attA - attB);
+
+        const t1A = candidateA.filter(p => p.tier === 1).length;
+        const t1B = candidateB.filter(p => p.tier === 1).length;
+        const t1Diff = Math.abs(t1A - t1B);
+
+        const totalCost = gkPenalty + (skillDiff * 100) + (posDiff * 45) + (t1Diff * 35) + Math.random();
+
+        if (totalCost < minCost) {
+          minCost = totalCost;
+          bestSplit = { teamA: candidateA, teamB: candidateB };
+        }
+      }
+
+      if (bestSplit) {
+        teamRed = bestSplit.teamA;
+        teamYellow = bestSplit.teamB;
+        bench = benchPool;
+      }
+
+      renderAllViews();
+      populateGoalscorerDropdowns();
+    }
+
+    function renderAllViews() {
+      calculateStats();
+      renderPitch();
+      renderSquadCards();
+      renderBench();
+      lucide.createIcons();
+    }
+
+    function formatFormation(def, mid, att) {
+      const parts = [def, mid, att].filter(count => count > 0);
+      return parts.length > 0 ? parts.join('-') : '0';
+    }
+
+    function calculateStats() {
+      const skillRed = teamRed.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
+      const skillYellow = teamYellow.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
+
+      const defRed = teamRed.filter(p => p.position === 'DEF').length;
+      const defYellow = teamYellow.filter(p => p.position === 'DEF').length;
+      const midRed = teamRed.filter(p => p.position === 'MID').length;
+      const midYellow = teamYellow.filter(p => p.position === 'MID').length;
+      const attRed = teamRed.filter(p => p.position === 'ATT').length;
+      const attYellow = teamYellow.filter(p => p.position === 'ATT').length;
+
+      document.getElementById('defRed').textContent = defRed;
+      document.getElementById('defYellow').textContent = defYellow;
+      document.getElementById('midRed').textContent = midRed;
+      document.getElementById('midYellow').textContent = midYellow;
+      document.getElementById('attRed').textContent = attRed;
+      document.getElementById('attYellow').textContent = attYellow;
+
+      const skillRedEl = document.getElementById('listSkillRed');
+      const skillYellowEl = document.getElementById('listSkillYellow');
+      if (isAdmin) {
+        skillRedEl.style.display = 'inline-block';
+        skillYellowEl.style.display = 'inline-block';
+        skillRedEl.textContent = `${skillRed} pts`;
+        skillYellowEl.textContent = `${skillYellow} pts`;
+      } else {
+        skillRedEl.style.display = 'none';
+        skillYellowEl.style.display = 'none';
+      }
+
+      document.getElementById('formationRed').textContent = formatFormation(defRed, midRed, attRed);
+      document.getElementById('formationYellow').textContent = formatFormation(defYellow, midYellow, attYellow);
+
+      const skillDiff = Math.abs(skillRed - skillYellow);
+      const posDiff = Math.abs(defRed - defYellow) + Math.abs(midRed - midYellow) + Math.abs(attRed - attYellow);
+      let fairness = 100 - (skillDiff * 7) - (posDiff * 4);
+      fairness = Math.max(70, Math.min(100, Math.round(fairness)));
+
+      document.getElementById('fairnessBadge').textContent = `${fairness}% Balanced`;
+    }
+
+    function createPitchPlayerCard(player, bgClass, textClass = 'text-white') {
+      const isSelected = swapSelectedId === player.id;
+      const swapClass = isSelected ? 'swap-active' : '';
+
+      const tierBadge = isAdmin ? `
+        <span class="absolute -bottom-1 -right-1 text-[9px] font-black px-1 rounded bg-slate-950 border border-slate-700 text-amber-300">
+          T${player.tier}
+        </span>` : '';
+
+      return `
+        <div onclick="handlePlayerClick('${player.id}')" class="flex flex-col items-center group relative cursor-pointer ${swapClass} transition-all shrink-0">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full ${bgClass} border-2 border-white/90 shadow-xl flex items-center justify-center font-black text-[11px] sm:text-xs ${textClass} relative">
+            ${player.name.substring(0, 2).toUpperCase()}
+            ${tierBadge}
+          </div>
+          <span class="mt-1 text-[9px] sm:text-[10px] font-bold text-white bg-slate-950/90 px-1 sm:px-1.5 py-0.5 rounded border border-slate-800 shadow truncate max-w-[55px] sm:max-w-[75px]">
+            ${player.name}
+          </span>
+        </div>
+      `;
+    }
+
+    function renderPitch() {
+      // Team Red Rows
+      const redGK = teamRed.filter(p => p.position === 'GK');
+      const redDEF = teamRed.filter(p => p.position === 'DEF');
+      const redMID = teamRed.filter(p => p.position === 'MID');
+      const redATT = teamRed.filter(p => p.position === 'ATT');
+
+      document.getElementById('pitchRedGK').innerHTML = redGK.map(p => createPitchPlayerCard(p, 'bg-amber-600')).join('') || '';
+      document.getElementById('pitchRedDEF').innerHTML = redDEF.map(p => createPitchPlayerCard(p, 'bg-red-700')).join('');
+      document.getElementById('pitchRedMID').innerHTML = redMID.map(p => createPitchPlayerCard(p, 'bg-red-700')).join('');
+      document.getElementById('pitchRedATT').innerHTML = redATT.map(p => createPitchPlayerCard(p, 'bg-red-700')).join('');
+
+      // Team Yellow Rows
+      const yellowGK = teamYellow.filter(p => p.position === 'GK');
+      const yellowDEF = teamYellow.filter(p => p.position === 'DEF');
+      const yellowMID = teamYellow.filter(p => p.position === 'MID');
+      const yellowATT = teamYellow.filter(p => p.position === 'ATT');
+
+      document.getElementById('pitchYellowGK').innerHTML = yellowGK.map(p => createPitchPlayerCard(p, 'bg-slate-800', 'text-amber-400')).join('') || '';
+      document.getElementById('pitchYellowDEF').innerHTML = yellowDEF.map(p => createPitchPlayerCard(p, 'bg-amber-500', 'text-slate-950')).join('');
+      document.getElementById('pitchYellowMID').innerHTML = yellowMID.map(p => createPitchPlayerCard(p, 'bg-amber-500', 'text-slate-950')).join('');
+      document.getElementById('pitchYellowATT').innerHTML = yellowATT.map(p => createPitchPlayerCard(p, 'bg-amber-500', 'text-slate-950')).join('');
+    }
+
+    function renderSquadCards() {
+      const redCont = document.getElementById('listRedContainer');
+      const yellowCont = document.getElementById('listYellowContainer');
+
+      redCont.innerHTML = teamRed.map(p => createSquadRow(p, 'red')).join('');
+      yellowCont.innerHTML = teamYellow.map(p => createSquadRow(p, 'yellow')).join('');
+    }
+
+    function createSquadRow(p, theme) {
+      const isSelected = swapSelectedId === p.id;
+      const swapClass = isSelected ? 'swap-active' : '';
+      const tierDisplayHTML = isAdmin ? TIER_BADGES[p.tier] : '';
+
+      return `
+        <div onclick="handlePlayerClick('${p.id}')" class="p-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 flex items-center justify-between cursor-pointer transition ${swapClass}">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2.5 h-2.5 rounded-full ${theme === 'red' ? 'bg-red-500' : 'bg-amber-400'}"></span>
+            <span class="text-xs font-bold text-slate-100">${p.name}</span>
+            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-slate-950 text-slate-300 border border-slate-800">${p.position}</span>
+          </div>
+          <div>
+            ${tierDisplayHTML}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBench() {
+      const list = document.getElementById('benchList');
+      document.getElementById('benchCount').textContent = bench.length;
+      list.innerHTML = '';
+
+      if (bench.length === 0) {
+        list.innerHTML = '<span class="text-xs text-slate-500">No bench players (All selected players active)</span>';
+        return;
+      }
+
+      bench.forEach(p => {
+        const item = document.createElement('div');
+        const isSelected = swapSelectedId === p.id;
+        item.className = `px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2 cursor-pointer ${isSelected ? 'swap-active' : ''}`;
+        item.onclick = () => handlePlayerClick(p.id);
+
+        item.innerHTML = `
+          <span class="text-xs font-bold text-slate-200">${p.name}</span>
+          <span class="text-[9px] font-extrabold px-1 rounded bg-amber-500/20 text-amber-300">${p.position}</span>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function handlePlayerClick(id) {
+      if (!swapSelectedId) {
+        swapSelectedId = id;
+        const player = players.find(p => p.id === id);
+        document.getElementById('swapBanner').classList.remove('hidden');
+        document.getElementById('swapText').textContent = `Selected "${player.name}". Tap another player card to swap positions!`;
+      } else if (swapSelectedId === id) {
+        cancelSwapSelection();
+      } else {
+        executePlayerSwap(swapSelectedId, id);
+        cancelSwapSelection();
+      }
+      renderAllViews();
+    }
+
+    function cancelSwapSelection() {
+      swapSelectedId = null;
+      document.getElementById('swapBanner').classList.add('hidden');
+      renderAllViews();
+    }
+
+    function executePlayerSwap(id1, id2) {
+      const findAndReplace = (arr, targetId, replacement) => {
+        const idx = arr.findIndex(p => p.id === targetId);
+        if (idx !== -1) {
+          arr[idx] = replacement;
+          return true;
+        }
+        return false;
+      };
+
+      let p1 = players.find(p => p.id === id1);
+      let p2 = players.find(p => p.id === id2);
+
+      if (!p1 || !p2) return;
+
+      findAndReplace(teamRed, id1, p2) || findAndReplace(teamYellow, id1, p2) || findAndReplace(bench, id1, p2);
+      findAndReplace(teamRed, id2, p1) || findAndReplace(teamYellow, id2, p1) || findAndReplace(bench, id2, p1);
+      populateGoalscorerDropdowns();
+    }
+
+    function switchTab(tab) {
+      document.getElementById('viewPitch').classList.add('hidden');
+      document.getElementById('viewList').classList.add('hidden');
+
+      document.getElementById('tabBtnPitch').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+      document.getElementById('tabBtnList').className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5";
+
+      if (tab === 'pitch') {
+        document.getElementById('viewPitch').classList.remove('hidden');
+        document.getElementById('tabBtnPitch').className = "px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1.5 shadow";
+      } else if (tab === 'list') {
+        document.getElementById('viewList').classList.remove('hidden');
+        document.getElementById('tabBtnList').className = "px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-black transition flex items-center gap-1.5 shadow";
+      }
+    }
+
+    /* SCOREBOARD & GOALSCORER MANAGEMENT */
+    function changeScore(team, delta) {
+      if (!isAdmin) return;
+      if (team === 'red') {
+        scoreRed = Math.max(0, scoreRed + delta);
+        document.getElementById('scoreDisplayRed').textContent = scoreRed;
+      } else {
+        scoreYellow = Math.max(0, scoreYellow + delta);
+        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
+      }
+    }
+
+    function populateGoalscorerDropdowns() {
+      const redSelect = document.getElementById('selectRedGoalscorer');
+      const yellowSelect = document.getElementById('selectYellowGoalscorer');
+
+      redSelect.innerHTML = '<option value="">Select Red Player...</option>';
+      teamRed.forEach(p => {
+        redSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+
+      yellowSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
+      teamYellow.forEach(p => {
+        yellowSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+    }
+
+    function addGoalscorer(team) {
+      if (!isAdmin) return;
+      if (team === 'red') {
+        const val = document.getElementById('selectRedGoalscorer').value;
+        if (!val) return;
+        redGoalscorers.push(val);
+        scoreRed++;
+        document.getElementById('scoreDisplayRed').textContent = scoreRed;
+        renderGoalscorers();
+      } else {
+        const val = document.getElementById('selectYellowGoalscorer').value;
+        if (!val) return;
+        yellowGoalscorers.push(val);
+        scoreYellow++;
+        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
+        renderGoalscorers();
+      }
+    }
+
+    function removeGoalscorer(team, index) {
+      if (!isAdmin) return;
+      if (team === 'red') {
+        redGoalscorers.splice(index, 1);
+        renderGoalscorers();
+      } else {
+        yellowGoalscorers.splice(index, 1);
+        renderGoalscorers();
+      }
+    }
+
+    function renderGoalscorers() {
+      const redContainer = document.getElementById('redGoalscorersList');
+      const yellowContainer = document.getElementById('yellowGoalscorersList');
+
+      redContainer.innerHTML = redGoalscorers.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/80 border border-red-800/60 text-red-300 text-[11px] font-bold">
+          ⚽ ${name}
+          ${isAdmin ? `<button onclick="removeGoalscorer('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
+
+      yellowContainer.innerHTML = yellowGoalscorers.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-950/80 border border-amber-800/60 text-amber-300 text-[11px] font-bold">
+          ⚽ ${name}
+          ${isAdmin ? `<button onclick="removeGoalscorer('yellow', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
+    }
+
+    /* RECALCULATE PLAYER STATS DYNAMICALLY FROM MATCH HISTORY */
+    function recalculatePlayerStats() {
+      players.forEach(p => {
+        p.mp = p.baseMp || 0;
+        p.wins = p.baseWins || 0;
+        p.goals = p.baseGoals || 0;
+        p.gf = p.baseGf || 0;
+        p.ga = p.baseGa || 0;
+      });
+
+      matchHistory.forEach(m => {
+        const redNames = m.teamRed || [];
+        const yellowNames = m.teamYellow || [];
+
+        players.forEach(p => {
+          const inRed = redNames.includes(p.name);
+          const inYellow = yellowNames.includes(p.name);
+
+          if (inRed) {
+            p.mp += 1;
+            p.gf += m.scoreRed;
+            p.ga += m.scoreYellow;
+            if (m.scoreRed > m.scoreYellow) p.wins += 1;
+            const indivGoals = (m.redGoals || []).filter(name => name === p.name).length;
+            p.goals += indivGoals;
+          } else if (inYellow) {
+            p.mp += 1;
+            p.gf += m.scoreYellow;
+            p.ga += m.scoreRed;
+            if (m.scoreYellow > m.scoreRed) p.wins += 1;
+            const indivGoals = (m.yellowGoals || []).filter(name => name === p.name).length;
+            p.goals += indivGoals;
+          }
+        });
+      });
+    }
+
+    /* PLAYER CAREER HISTORY & LEADERBOARD LOGIC */
+    function renderPlayerHistory() {
+      recalculatePlayerStats();
+
+      const tbody = document.getElementById('playerHistoryTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const searchInput = document.getElementById('leaderboardSearch');
+      const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+      const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name));
+      const filtered = sorted.filter(p => p.name.toLowerCase().includes(query) || p.position.toLowerCase().includes(query));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
+        return;
+      }
+
+      filtered.forEach(p => {
+        const mp = p.mp || 0;
+        const wins = p.wins || 0;
+        const goals = p.goals || 0;
+        const gf = p.gf || 0;
+        const ga = p.ga || 0;
+        const gd = gf - ga;
+        const gdSign = gd > 0 ? `+${gd}` : `${gd}`;
+        const gdColor = gd > 0 ? 'text-emerald-400' : gd < 0 ? 'text-red-400' : 'text-slate-400';
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-900/50 transition border-b border-slate-800/40";
+        tr.innerHTML = `
+          <td class="py-2.5 px-3 font-bold text-slate-100 flex items-center gap-2">
+            <span>${p.name}</span>
+          </td>
+          <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">${p.position}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-200">${mp}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-emerald-400 font-bold">${wins}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black">${goals}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-300">${gf}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-400">${ga}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold ${gdColor}">${gdSign}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function openPlayerStatsModal() {
+      if (!isAdmin) return;
+      document.getElementById('playerStatsModal').classList.remove('hidden');
+      renderAdminPlayerStatsTable();
+    }
+
+    function closePlayerStatsModal() {
+      document.getElementById('playerStatsModal').classList.add('hidden');
+    }
+
+    function getMatchStatsForPlayer(name) {
+      const stats = { mp: 0, wins: 0, goals: 0, gf: 0, ga: 0 };
+      matchHistory.forEach(m => {
+        const redNames = m.teamRed || [];
+        const yellowNames = m.teamYellow || [];
+
+        if (redNames.includes(name)) {
+          stats.mp += 1;
+          stats.gf += m.scoreRed;
+          stats.ga += m.scoreYellow;
+          if (m.scoreRed > m.scoreYellow) stats.wins += 1;
+          stats.goals += (m.redGoals || []).filter(n => n === name).length;
+        } else if (yellowNames.includes(name)) {
+          stats.mp += 1;
+          stats.gf += m.scoreYellow;
+          stats.ga += m.scoreRed;
+          if (m.scoreYellow > m.scoreRed) stats.wins += 1;
+          stats.goals += (m.yellowGoals || []).filter(n => n === name).length;
+        }
+      });
+      return stats;
+    }
+
+    function renderAdminPlayerStatsTable() {
+      const container = document.getElementById('adminPlayerStatsTable');
+      container.innerHTML = '';
+
+      players.forEach(p => {
+        const row = document.createElement('div');
+        row.className = "p-3 rounded-xl bg-slate-900 border border-slate-800 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center text-xs";
+
+        row.innerHTML = `
+          <div class="sm:col-span-3 font-bold text-slate-100 flex items-center gap-2">
+            <span>${p.name}</span>
+            <span class="text-[10px] text-slate-400">(${p.position})</span>
+          </div>
+          
+          <div class="sm:col-span-9 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Matches (MP)</label>
+              <input type="number" min="0" value="${p.mp || 0}" onchange="updatePlayerStatVal('${p.id}', 'mp', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-300 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Wins (W)</label>
+              <input type="number" min="0" value="${p.wins || 0}" onchange="updatePlayerStatVal('${p.id}', 'wins', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-emerald-400 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Indiv Goals</label>
+              <input type="number" min="0" value="${p.goals || 0}" onchange="updatePlayerStatVal('${p.id}', 'goals', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-400 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Team GF</label>
+              <input type="number" min="0" value="${p.gf || 0}" onchange="updatePlayerStatVal('${p.id}', 'gf', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-200 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Team GA</label>
+              <input type="number" min="0" value="${p.ga || 0}" onchange="updatePlayerStatVal('${p.id}', 'ga', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 font-mono text-xs focus:outline-none">
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function updatePlayerStatVal(id, field, val) {
+      const p = players.find(x => x.id === id);
+      if (p) {
+        const matchStats = getMatchStatsForPlayer(p.name);
+        const targetTotal = parseInt(val) || 0;
+        const basePropName = 'base' + field.charAt(0).toUpperCase() + field.slice(1);
+        p[basePropName] = targetTotal - (matchStats[field] || 0);
+      }
+    }
+
+    function saveAdminPlayerStats() {
+      saveRoster();
+      renderPlayerHistory();
+      closePlayerStatsModal();
+    }
+
+    /* MATCH HISTORY LOCAL STORAGE LOGIC */
+    function loadMatchHistory() {
+      const saved = localStorage.getItem('ufc_mysore_match_history');
+      if (saved) {
+        try {
+          matchHistory = JSON.parse(saved);
+        } catch (e) {
+          matchHistory = [];
+        }
+      } else {
+        matchHistory = [];
+      }
+    }
+
+    function saveMatchHistory() {
+      localStorage.setItem('ufc_mysore_match_history', JSON.stringify(matchHistory));
+    }
+
+    function saveMatchToHistory() {
+      if (!isAdmin) return;
+      if (teamRed.length === 0 && teamYellow.length === 0) return;
+
+      const matchRecord = {
+        id: Date.now().toString(),
+        date: selectedMatchDate,
+        scoreRed: scoreRed,
+        scoreYellow: scoreYellow,
+        teamRed: teamRed.map(p => p.name),
+        teamYellow: teamYellow.map(p => p.name),
+        redGoals: [...redGoalscorers],
+        yellowGoals: [...yellowGoalscorers]
+      };
+
+      matchHistory.unshift(matchRecord);
+      saveMatchHistory();
+      renderMatchHistory();
+      renderPlayerHistory();
+
+      // Reset live scoreboard
+      scoreRed = 0;
+      scoreYellow = 0;
+      redGoalscorers = [];
+      yellowGoalscorers = [];
+      document.getElementById('scoreDisplayRed').textContent = '0';
+      document.getElementById('scoreDisplayYellow').textContent = '0';
+      renderGoalscorers();
+    }
+
+    function renderMatchHistory() {
+      const container = document.getElementById('matchHistoryContainer');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (matchHistory.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-xs text-slate-500">No match records saved yet.</div>';
+        return;
+      }
+
+      matchHistory.forEach((m, idx) => {
+        const item = document.createElement('div');
+        item.className = 'glass-card rounded-xl p-3 sm:p-4 space-y-2 border border-slate-800';
+
+        const redGoalsStr = (m.redGoals || []).length > 0 ? (m.redGoals || []).join(', ') : 'None';
+        const yellowGoalsStr = (m.yellowGoals || []).length > 0 ? (m.yellowGoals || []).join(', ') : 'None';
+
+        item.innerHTML = `
+          <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
+            <span class="font-mono text-amber-400 font-bold">📅 ${m.date || 'Unknown Date'}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400 font-mono">Match #${matchHistory.length - idx}</span>
+              ${isAdmin ? `<button onclick="deleteMatchFromHistory('${m.id}')" class="text-red-400 hover:text-red-300 font-bold ml-2 text-xs">Delete</button>` : ''}
+            </div>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <div class="font-bold text-xs text-red-400 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-red-600"></span> Red (${m.scoreRed})
+            </div>
+            <div class="font-mono font-black text-sm text-white">${m.scoreRed} - ${m.scoreYellow}</div>
+            <div class="font-bold text-xs text-amber-400 flex items-center gap-1">
+              Yellow (${m.scoreYellow}) <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            </div>
+          </div>
+          <div class="text-[11px] text-slate-400 space-y-0.5 pt-1 border-t border-slate-800/60">
+            <div><strong class="text-red-400">Red Scored:</strong> ${redGoalsStr}</div>
+            <div><strong class="text-amber-400">Yellow Scored:</strong> ${yellowGoalsStr}</div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function deleteMatchFromHistory(id) {
+      if (!isAdmin) return;
+      matchHistory = matchHistory.filter(m => m.id !== id);
+      saveMatchHistory();
+      renderMatchHistory();
+      renderPlayerHistory();
+    }
+
+    function clearMatchHistory() {
+      if (!isAdmin) return;
+      if (confirm('Are you sure you want to clear all match history records?')) {
+        matchHistory = [];
+        saveMatchHistory();
+        renderMatchHistory();
+        renderPlayerHistory();
+      }
+    }
+
+    /* ROSTER MODAL MATRIX RENDERER */
+    function renderRosterTable() {
+      const container = document.getElementById('rosterTable');
+      if (!container) return;
+      container.innerHTML = '';
+
+      players.forEach(p => {
+        const item = document.createElement('div');
+        item.className = "p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs";
+
+        item.innerHTML = `
+          <div class="flex items-center space-x-2 flex-1 min-w-[150px]">
+            <input type="text" value="${p.name}" onchange="updatePlayerProp('${p.id}', 'name', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-100 font-bold focus:outline-none focus:border-amber-500 w-full text-xs">
+          </div>
+          <div class="flex items-center space-x-2">
+            <select onchange="updatePlayerProp('${p.id}', 'position', this.value)" class="bg-slate-950 border border-slate-800 text-slate-300 rounded px-2 py-1 text-xs focus:outline-none">
+              <option value="GK" ${p.position === 'GK' ? 'selected' : ''}>GK</option>
+              <option value="DEF" ${p.position === 'DEF' ? 'selected' : ''}>DEF</option>
+              <option value="MID" ${p.position === 'MID' ? 'selected' : ''}>MID</option>
+              <option value="ATT" ${p.position === 'ATT' ? 'selected' : ''}>ATT</option>
+            </select>
+            <select onchange="updatePlayerProp('${p.id}', 'tier', parseInt(this.value))" class="bg-slate-950 border border-slate-800 text-slate-300 rounded px-2 py-1 text-xs focus:outline-none">
+              <option value="1" ${p.tier === 1 ? 'selected' : ''}>⭐ Tier 1</option>
+              <option value="2" ${p.tier === 2 ? 'selected' : ''}>⚡ Tier 2</option>
+              <option value="3" ${p.tier === 3 ? 'selected' : ''}>🔷 Tier 3</option>
+            </select>
+            <button onclick="deletePlayer('${p.id}')" class="p-1 text-red-400 hover:text-red-300 rounded transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    function updatePlayerProp(id, prop, val) {
+      const p = players.find(x => x.id === id);
+      if (p) {
+        p[prop] = val;
+        saveRoster();
+        renderAttendanceList();
+        generateBalancedTeams();
+      }
+    }
+
+    function handleAddPlayer(e) {
+      e.preventDefault();
+      const name = document.getElementById('newPlayerName').value.trim();
+      const position = document.getElementById('newPlayerPos').value;
+      const tier = parseInt(document.getElementById('newPlayerTier').value);
+
+      if (!name) return;
+
+      const newP = {
+        id: Date.now().toString(),
+        name,
+        position,
+        tier,
+        selected: true,
+        baseMp: 0,
+        baseWins: 0,
+        baseGoals: 0,
+        baseGf: 0,
+        baseGa: 0
+      };
+
+      players.push(newP);
+      document.getElementById('newPlayerName').value = '';
+      saveRoster();
+      renderRosterTable();
+      renderAttendanceList();
+      generateBalancedTeams();
+    }
+
+    function deletePlayer(id) {
+      players = players.filter(p => p.id !== id);
+      saveRoster();
+      renderRosterTable();
+      renderAttendanceList();
+      generateBalancedTeams();
+    }
+
+    function promptResetRoster() {
+      openConfirmModal("Reset Squad?", "Are you sure you want to reset all squad members back to the default UFC Mysore setup?", () => {
+        players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+        saveRoster();
+        renderRosterTable();
+        renderAttendanceList();
+        generateBalancedTeams();
+      });
+    }
+
+    function exportRosterJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(players, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "ufc_mysore_roster.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    /* CONFIRMATION MODAL HELPER */
+    function openConfirmModal(title, text, onConfirm) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmText').textContent = text;
+      confirmCallback = onConfirm;
+      document.getElementById('confirmModal').classList.remove('hidden');
+    }
+
+    function closeConfirmModal(accepted) {
+      document.getElementById('confirmModal').classList.add('hidden');
+      if (accepted && confirmCallback) {
+        confirmCallback();
+      }
+      confirmCallback = null;
+    }
+
+    /* EXPORT FORMATTER */
+    function openExportModal() {
+      const redNames = teamRed.map(p => `• ${p.name} (${p.position})`).join('\n');
+      const yellowNames = teamYellow.map(p => `• ${p.name} (${p.position})`).join('\n');
+      const benchNames = bench.length > 0 ? bench.map(p => `• ${p.name} (${p.position})`).join('\n') : '• None';
+
+      const exportText = `⚽ *UFC MYSORE MATCHDAY LINEUP* ⚽\n📅 Date: ${selectedMatchDate}\n\n🔴 *UFC MYSORE RED*\n${redNames}\n\n🟡 *UFC MYSORE YELLOW*\n${yellowNames}\n\n🔄 *SUBSTITUTES / BENCH*\n${benchNames}`;
+
+      document.getElementById('exportTextarea').value = exportText;
+      document.getElementById('exportModal').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.add('hidden');
+    }
+
+    function executeCopyText() {
+      const textarea = document.getElementById('exportTextarea');
+      textarea.select();
+      document.execCommand('copy');
+
+      const toast = document.getElementById('toastMessage');
+      toast.classList.remove('opacity-0');
+      setTimeout(() => toast.classList.add('opacity-0'), 2000);
+    }
+  </script>
+</body>
+</html>
