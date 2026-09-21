@@ -41,6 +41,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body {
@@ -212,7 +213,7 @@
 
             <!-- Controls & Search -->
             <div class="py-3 space-y-2.5">
-              <div class="flex flex-wrap items-center gap-1.5 text-xs">
+              <div class="admin-only flex flex-wrap items-center gap-1.5 text-xs">
                 <button onclick="quickSelect(14)" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition flex items-center gap-1">
                   <i data-lucide="zap" class="w-3.5 h-3.5"></i> Select 14
                 </button>
@@ -681,12 +682,15 @@
         </button>
       </div>
 
-      <p class="text-xs text-slate-400">Enter administrator password to manage roster matrix, edit scoreboard, and update player statistics.</p>
+      <p class="text-xs text-slate-400">Sign in with your Supabase administrator account to manage the roster, scoreboard, and player statistics.</p>
 
       <form onsubmit="handleAdminLogin(event)" class="space-y-3">
         <div>
-          <input type="password" id="adminPasswordInput" required placeholder="Enter admin password" class="w-full px-3.5 py-2 text-xs sm:text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
-          <p id="adminLoginError" class="text-[11px] text-red-400 font-bold mt-1.5 hidden">Incorrect password. Please try again.</p>
+          <input type="email" id="adminEmailInput" required autocomplete="username" placeholder="Admin email" class="w-full px-3.5 py-2 text-xs sm:text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+        </div>
+        <div>
+          <input type="password" id="adminPasswordInput" required autocomplete="current-password" placeholder="Admin password" class="w-full px-3.5 py-2 text-xs sm:text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
+          <p id="adminLoginError" class="text-[11px] text-red-400 font-bold mt-1.5 hidden">Unable to sign in. Check your email and password.</p>
         </div>
         <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition shadow">
           Authenticate & Unlock
@@ -765,7 +769,7 @@
       </div>
 
       <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex justify-between items-center">
-        <span class="text-xs text-slate-400">Changes auto-save locally to browser storage.</span>
+        <span class="text-xs text-slate-400">Changes auto-save to the shared Supabase database.</span>
         <button onclick="closeRosterModal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-xl text-xs transition">
           Save & Apply
         </button>
@@ -864,6 +868,10 @@
   </div>
 
   <script>
+    const SUPABASE_URL = 'https://eersfvszrawyzweaekqb.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_12hYv4A2K3qM6lOEclTK5Q_YJPZL7i6';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
     // Official Roster Data for UFC Mysore with Career Stats Schema
     const DEFAULT_ROSTER = [
       { id: '1', name: 'Joel', position: 'GK', tier: 2, selected: true, baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0 },
@@ -903,9 +911,8 @@
     let swapSelectedId = null;
     let confirmCallback = null;
 
-    // Admin State & Password
+    // Admin authentication state
     let isAdmin = false;
-    const ADMIN_PASSWORD = "admins@123";
 
     // Match Score, Goalscorers & History
     let scoreRed = 0;
@@ -915,17 +922,23 @@
     let selectedMatchDate = new Date().toISOString().split('T')[0];
     let matchHistory = [];
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('matchDateControl').value = selectedMatchDate;
       updateMatchDateDisplay();
 
-      loadRoster();
-      loadMatchHistory();
+      const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+      if (sessionError) {
+        console.error('Unable to restore the administrator session:', sessionError);
+      }
+      isAdmin = Boolean(session);
+
+      await loadSharedState();
       renderAttendanceList();
       generateBalancedTeams();
       updateAdminUIState();
       renderPlayerHistory();
       renderMatchHistory();
+      subscribeToSharedUpdates();
       lucide.createIcons();
     });
 
@@ -979,8 +992,14 @@
     }
 
     /* ADMIN AUTHENTICATION CONTROLS */
-    function handleAdminAuthClick() {
+    async function handleAdminAuthClick() {
       if (isAdmin) {
+        const { error } = await supabaseClient.auth.signOut();
+        if (error) {
+          console.error('Unable to sign out:', error);
+          alert('Unable to sign out. Please try again.');
+          return;
+        }
         isAdmin = false;
         updateAdminUIState();
         renderAttendanceList();
@@ -993,6 +1012,7 @@
     }
 
     function openAdminLoginModal() {
+      document.getElementById('adminEmailInput').value = '';
       document.getElementById('adminPasswordInput').value = '';
       document.getElementById('adminLoginError').classList.add('hidden');
       document.getElementById('adminLoginModal').classList.remove('hidden');
@@ -1002,20 +1022,25 @@
       document.getElementById('adminLoginModal').classList.add('hidden');
     }
 
-    function handleAdminLogin(e) {
+    async function handleAdminLogin(e) {
       e.preventDefault();
-      const pwd = document.getElementById('adminPasswordInput').value;
-      if (pwd === ADMIN_PASSWORD) {
-        isAdmin = true;
-        closeAdminLoginModal();
-        updateAdminUIState();
-        renderAttendanceList();
-        renderAllViews();
-        renderMatchHistory();
-        renderPlayerHistory();
-      } else {
+      const email = document.getElementById('adminEmailInput').value.trim();
+      const password = document.getElementById('adminPasswordInput').value;
+      const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        console.error('Administrator login failed:', error);
         document.getElementById('adminLoginError').classList.remove('hidden');
+        return;
       }
+
+      isAdmin = true;
+      closeAdminLoginModal();
+      updateAdminUIState();
+      renderAttendanceList();
+      renderAllViews();
+      renderMatchHistory();
+      renderPlayerHistory();
     }
 
     function updateAdminUIState() {
@@ -1049,28 +1074,100 @@
       lucide.createIcons();
     }
 
-    function loadRoster() {
-      const saved = localStorage.getItem('ufc_mysore_roster_yellow_v2');
-      if (saved) {
-        try {
-          const loaded = JSON.parse(saved);
-          players = loaded.map(p => ({
-            baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0,
-            ...p
-          }));
-        } catch (e) {
-          players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
-        }
-      } else {
+    function normalizeRoster(roster) {
+      return roster.map(p => ({
+        baseMp: 0, baseWins: 0, baseGoals: 0, baseGf: 0, baseGa: 0,
+        ...p
+      }));
+    }
+
+    async function loadSharedState() {
+      const { data, error } = await supabaseClient
+        .from('ufc_app_state')
+        .select('roster, match_history')
+        .eq('id', 'main')
+        .single();
+
+      if (error) {
+        console.error('Unable to load shared UFC data:', error);
         players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
-        saveRoster();
+        matchHistory = [];
+        alert('Unable to load shared data from Supabase. Check the table and read policy.');
+        return;
       }
+
+      players = Array.isArray(data.roster) && data.roster.length > 0
+        ? normalizeRoster(data.roster)
+        : JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+      matchHistory = Array.isArray(data.match_history) ? data.match_history : [];
       updateAttendanceBadge();
     }
 
-    function saveRoster() {
-      localStorage.setItem('ufc_mysore_roster_yellow_v2', JSON.stringify(players));
+    async function saveRoster() {
+      if (!isAdmin) return false;
+
+      const { error } = await supabaseClient
+        .from('ufc_app_state')
+        .update({
+          roster: players,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 'main');
+
+      if (error) {
+        console.error('Unable to save the shared roster:', error);
+        alert('The roster could not be saved to Supabase.');
+        await reloadSharedState();
+        return false;
+      }
+
       updateAttendanceBadge();
+      return true;
+    }
+
+    async function reloadSharedState() {
+      await loadSharedState();
+      renderAttendanceList();
+      generateBalancedTeams();
+      renderMatchHistory();
+      renderPlayerHistory();
+      if (!document.getElementById('rosterModal').classList.contains('hidden')) {
+        renderRosterTable();
+      }
+    }
+
+    function subscribeToSharedUpdates() {
+      supabaseClient
+        .channel('ufc-shared-state')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'ufc_app_state',
+            filter: 'id=eq.main'
+          },
+          payload => {
+            const state = payload.new;
+            players = Array.isArray(state.roster) && state.roster.length > 0
+              ? normalizeRoster(state.roster)
+              : JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+            matchHistory = Array.isArray(state.match_history) ? state.match_history : [];
+            updateAttendanceBadge();
+            renderAttendanceList();
+            generateBalancedTeams();
+            renderMatchHistory();
+            renderPlayerHistory();
+            if (!document.getElementById('rosterModal').classList.contains('hidden')) {
+              renderRosterTable();
+            }
+          }
+        )
+        .subscribe(status => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error(`Supabase realtime subscription failed: ${status}`);
+          }
+        });
     }
 
     function updateAttendanceBadge() {
@@ -1102,7 +1199,7 @@
 
       filtered.forEach(p => {
         const item = document.createElement('div');
-        item.className = `p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition ${
+        item.className = `p-2.5 rounded-xl flex items-center justify-between transition ${isAdmin ? 'cursor-pointer' : 'cursor-default'} ${
           p.selected 
             ? 'bg-slate-900/90 border border-amber-900/50 hover:border-amber-500/50' 
             : 'bg-slate-950/40 border border-transparent text-slate-500 hover:bg-slate-900/40'
@@ -1125,7 +1222,7 @@
 
         item.innerHTML = `
           <div class="flex items-center space-x-3">
-            <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer">
+            <input type="checkbox" ${p.selected ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 ${isAdmin ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}">
             <div class="flex items-center gap-2">
               <span class="font-bold text-xs ${p.selected ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${posStyle}">${p.position}</span>
@@ -1142,6 +1239,7 @@
     }
 
     function toggleAttendance(id) {
+      if (!isAdmin) return;
       const p = players.find(x => x.id === id);
       if (p) {
         p.selected = !p.selected;
@@ -1152,6 +1250,7 @@
     }
 
     function quickSelect(count) {
+      if (!isAdmin) return;
       players.forEach(p => p.selected = false);
       const gks = players.filter(p => p.position === 'GK').slice(0, 2);
       gks.forEach(p => p.selected = true);
@@ -1177,6 +1276,7 @@
     }
 
     function selectAll() {
+      if (!isAdmin) return;
       players.forEach(p => p.selected = true);
       saveRoster();
       renderAttendanceList();
@@ -1184,6 +1284,7 @@
     }
 
     function clearAll() {
+      if (!isAdmin) return;
       players.forEach(p => p.selected = false);
       saveRoster();
       renderAttendanceList();
@@ -1705,6 +1806,7 @@
     }
 
     function updatePlayerStatVal(id, field, val) {
+      if (!isAdmin) return;
       const p = players.find(x => x.id === id);
       if (p) {
         const matchStats = getMatchStatsForPlayer(p.name);
@@ -1714,31 +1816,36 @@
       }
     }
 
-    function saveAdminPlayerStats() {
-      saveRoster();
+    async function saveAdminPlayerStats() {
+      if (!isAdmin) return;
+      const saved = await saveRoster();
+      if (!saved) return;
       renderPlayerHistory();
       closePlayerStatsModal();
     }
 
-    /* MATCH HISTORY LOCAL STORAGE LOGIC */
-    function loadMatchHistory() {
-      const saved = localStorage.getItem('ufc_mysore_match_history');
-      if (saved) {
-        try {
-          matchHistory = JSON.parse(saved);
-        } catch (e) {
-          matchHistory = [];
-        }
-      } else {
-        matchHistory = [];
+    async function saveMatchHistory() {
+      if (!isAdmin) return false;
+
+      const { error } = await supabaseClient
+        .from('ufc_app_state')
+        .update({
+          match_history: matchHistory,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 'main');
+
+      if (error) {
+        console.error('Unable to save shared match history:', error);
+        alert('Match history could not be saved to Supabase.');
+        await reloadSharedState();
+        return false;
       }
+
+      return true;
     }
 
-    function saveMatchHistory() {
-      localStorage.setItem('ufc_mysore_match_history', JSON.stringify(matchHistory));
-    }
-
-    function saveMatchToHistory() {
+    async function saveMatchToHistory() {
       if (!isAdmin) return;
       if (teamRed.length === 0 && teamYellow.length === 0) return;
 
@@ -1754,7 +1861,8 @@
       };
 
       matchHistory.unshift(matchRecord);
-      saveMatchHistory();
+      const saved = await saveMatchHistory();
+      if (!saved) return;
       renderMatchHistory();
       renderPlayerHistory();
 
@@ -1811,19 +1919,21 @@
       });
     }
 
-    function deleteMatchFromHistory(id) {
+    async function deleteMatchFromHistory(id) {
       if (!isAdmin) return;
       matchHistory = matchHistory.filter(m => m.id !== id);
-      saveMatchHistory();
+      const saved = await saveMatchHistory();
+      if (!saved) return;
       renderMatchHistory();
       renderPlayerHistory();
     }
 
-    function clearMatchHistory() {
+    async function clearMatchHistory() {
       if (!isAdmin) return;
       if (confirm('Are you sure you want to clear all match history records?')) {
         matchHistory = [];
-        saveMatchHistory();
+        const saved = await saveMatchHistory();
+        if (!saved) return;
         renderMatchHistory();
         renderPlayerHistory();
       }
@@ -1867,6 +1977,7 @@
     }
 
     function updatePlayerProp(id, prop, val) {
+      if (!isAdmin) return;
       const p = players.find(x => x.id === id);
       if (p) {
         p[prop] = val;
@@ -1878,6 +1989,7 @@
 
     function handleAddPlayer(e) {
       e.preventDefault();
+      if (!isAdmin) return;
       const name = document.getElementById('newPlayerName').value.trim();
       const position = document.getElementById('newPlayerPos').value;
       const tier = parseInt(document.getElementById('newPlayerTier').value);
@@ -1906,6 +2018,7 @@
     }
 
     function deletePlayer(id) {
+      if (!isAdmin) return;
       players = players.filter(p => p.id !== id);
       saveRoster();
       renderRosterTable();
@@ -1914,6 +2027,7 @@
     }
 
     function promptResetRoster() {
+      if (!isAdmin) return;
       openConfirmModal("Reset Squad?", "Are you sure you want to reset all squad members back to the default UFC Mysore setup?", () => {
         players = JSON.parse(JSON.stringify(DEFAULT_ROSTER));
         saveRoster();
