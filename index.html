@@ -213,7 +213,7 @@
 
             <!-- Controls & Search -->
             <div class="py-3 space-y-2.5">
-              <div class="admin-only flex flex-wrap items-center gap-1.5 text-xs">
+              <div class="flex flex-wrap items-center gap-1.5 text-xs">
                 <button onclick="quickSelect(14)" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-semibold transition flex items-center gap-1">
                   <i data-lucide="zap" class="w-3.5 h-3.5"></i> Select 14
                 </button>
@@ -1199,7 +1199,7 @@
 
       filtered.forEach(p => {
         const item = document.createElement('div');
-        item.className = `p-2.5 rounded-xl flex items-center justify-between transition ${isAdmin ? 'cursor-pointer' : 'cursor-default'} ${
+        item.className = `p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition ${
           p.selected 
             ? 'bg-slate-900/90 border border-amber-900/50 hover:border-amber-500/50' 
             : 'bg-slate-950/40 border border-transparent text-slate-500 hover:bg-slate-900/40'
@@ -1222,7 +1222,7 @@
 
         item.innerHTML = `
           <div class="flex items-center space-x-3">
-            <input type="checkbox" ${p.selected ? 'checked' : ''} ${isAdmin ? '' : 'disabled'} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 ${isAdmin ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}">
+            <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer">
             <div class="flex items-center gap-2">
               <span class="font-bold text-xs ${p.selected ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${posStyle}">${p.position}</span>
@@ -1239,18 +1239,16 @@
     }
 
     function toggleAttendance(id) {
-      if (!isAdmin) return;
       const p = players.find(x => x.id === id);
       if (p) {
         p.selected = !p.selected;
-        saveRoster();
+        updateAttendanceBadge();
         renderAttendanceList();
         generateBalancedTeams();
       }
     }
 
     function quickSelect(count) {
-      if (!isAdmin) return;
       players.forEach(p => p.selected = false);
       const gks = players.filter(p => p.position === 'GK').slice(0, 2);
       gks.forEach(p => p.selected = true);
@@ -1270,23 +1268,21 @@
         players.filter(p => !p.selected).slice(0, needed).forEach(p => p.selected = true);
       }
 
-      saveRoster();
+      updateAttendanceBadge();
       renderAttendanceList();
       generateBalancedTeams();
     }
 
     function selectAll() {
-      if (!isAdmin) return;
       players.forEach(p => p.selected = true);
-      saveRoster();
+      updateAttendanceBadge();
       renderAttendanceList();
       generateBalancedTeams();
     }
 
     function clearAll() {
-      if (!isAdmin) return;
       players.forEach(p => p.selected = false);
-      saveRoster();
+      updateAttendanceBadge();
       renderAttendanceList();
       generateBalancedTeams();
     }
