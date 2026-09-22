@@ -1405,11 +1405,33 @@
       if (bestSplit) {
         teamRed = bestSplit.teamA;
         teamYellow = bestSplit.teamB;
-        bench = benchPool;
+        bench = assignBenchTeams(benchPool);
       }
 
       renderAllViews();
       populateGoalscorerDropdowns();
+    }
+
+    function assignBenchTeams(benchPool) {
+      let redCount = teamRed.length;
+      let yellowCount = teamYellow.length;
+      let redSkill = teamRed.reduce((sum, p) => sum + TIER_POINTS[p.tier], 0);
+      let yellowSkill = teamYellow.reduce((sum, p) => sum + TIER_POINTS[p.tier], 0);
+
+      return benchPool
+        .slice()
+        .sort((a, b) => POSITION_RANK[a.position] - POSITION_RANK[b.position] || a.tier - b.tier || a.name.localeCompare(b.name))
+        .map(p => {
+          const benchTeam = redCount < yellowCount || (redCount === yellowCount && redSkill <= yellowSkill) ? 'red' : 'yellow';
+          if (benchTeam === 'red') {
+            redCount++;
+            redSkill += TIER_POINTS[p.tier];
+          } else {
+            yellowCount++;
+            yellowSkill += TIER_POINTS[p.tier];
+          }
+          return { ...p, benchTeam };
+        });
     }
 
     function renderAllViews() {
@@ -1549,7 +1571,38 @@
         return;
       }
 
-      bench.forEach(p => {
+      const renderBenchGroup = (title, team, colorClass, playersForTeam) => {
+        if (playersForTeam.length === 0) return;
+        const group = document.createElement('div');
+        group.className = "w-full space-y-1.5";
+        group.innerHTML = `
+          <div class="text-[10px] uppercase tracking-wider font-black ${colorClass}">${title}</div>
+          <div class="flex flex-wrap gap-2"></div>
+        `;
+        const groupList = group.querySelector('div:last-child');
+
+        playersForTeam.forEach(p => {
+          const item = document.createElement('div');
+          const isSelected = swapSelectedId === p.id;
+          const dotClass = team === 'red' ? 'bg-red-500' : 'bg-amber-400';
+          item.className = `px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2 cursor-pointer ${isSelected ? 'swap-active' : ''}`;
+          item.onclick = () => handlePlayerClick(p.id);
+
+          item.innerHTML = `
+            <span class="w-2 h-2 rounded-full ${dotClass}"></span>
+            <span class="text-xs font-bold text-slate-200">${p.name}</span>
+            <span class="text-[9px] font-extrabold px-1 rounded bg-amber-500/20 text-amber-300">${p.position}</span>
+          `;
+          groupList.appendChild(item);
+        });
+
+        list.appendChild(group);
+      };
+
+      renderBenchGroup('Red Substitutes', 'red', 'text-red-400', bench.filter(p => p.benchTeam === 'red'));
+      renderBenchGroup('Yellow Substitutes', 'yellow', 'text-amber-400', bench.filter(p => p.benchTeam === 'yellow'));
+
+      bench.filter(p => !p.benchTeam).forEach(p => {
         const item = document.createElement('div');
         const isSelected = swapSelectedId === p.id;
         item.className = `px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center gap-2 cursor-pointer ${isSelected ? 'swap-active' : ''}`;
@@ -1566,14 +1619,17 @@
     function handlePlayerClick(id) {
       if (!swapSelectedId) {
         swapSelectedId = id;
-        const player = players.find(p => p.id === id);
+        const player = findMatchPlayer(id)?.player;
+        if (!player) return;
         document.getElementById('swapBanner').classList.remove('hidden');
         document.getElementById('swapText').textContent = `Selected "${player.name}". Tap another player card to swap positions!`;
       } else if (swapSelectedId === id) {
         cancelSwapSelection();
       } else {
-        executePlayerSwap(swapSelectedId, id);
-        cancelSwapSelection();
+        const swapped = executePlayerSwap(swapSelectedId, id);
+        if (swapped) {
+          cancelSwapSelection();
+        }
       }
       renderAllViews();
     }
@@ -1584,24 +1640,63 @@
       renderAllViews();
     }
 
-    function executePlayerSwap(id1, id2) {
-      const findAndReplace = (arr, targetId, replacement) => {
-        const idx = arr.findIndex(p => p.id === targetId);
-        if (idx !== -1) {
-          arr[idx] = replacement;
-          return true;
+    function findMatchPlayer(id) {
+      const locations = [
+        { name: 'red', list: teamRed },
+        { name: 'yellow', list: teamYellow },
+        { name: 'bench', list: bench }
+      ];
+
+      for (const location of locations) {
+        const index = location.list.findIndex(p => p.id === id);
+        if (index !== -1) {
+          return { player: location.list[index], location: location.name, index };
         }
-        return false;
-      };
+      }
 
-      let p1 = players.find(p => p.id === id1);
-      let p2 = players.find(p => p.id === id2);
+      return null;
+    }
 
-      if (!p1 || !p2) return;
+    function stripBenchTeam(player) {
+      const { benchTeam, ...activePlayer } = player;
+      return activePlayer;
+    }
 
-      findAndReplace(teamRed, id1, p2) || findAndReplace(teamYellow, id1, p2) || findAndReplace(bench, id1, p2);
-      findAndReplace(teamRed, id2, p1) || findAndReplace(teamYellow, id2, p1) || findAndReplace(bench, id2, p1);
+    function executePlayerSwap(id1, id2) {
+      const first = findMatchPlayer(id1);
+      const second = findMatchPlayer(id2);
+
+      if (!first || !second) return false;
+
+      if (first.location === 'bench' || second.location === 'bench') {
+        const benchEntry = first.location === 'bench' ? first : second;
+        const activeEntry = first.location === 'bench' ? second : first;
+        const assignedTeam = benchEntry.player.benchTeam;
+
+        if (!assignedTeam || (activeEntry.location !== 'red' && activeEntry.location !== 'yellow')) {
+          return false;
+        }
+
+        if (activeEntry.location !== assignedTeam) {
+          const teamLabel = assignedTeam === 'red' ? 'Red' : 'Yellow';
+          document.getElementById('swapBanner').classList.remove('hidden');
+          document.getElementById('swapText').textContent = `${benchEntry.player.name} is a ${teamLabel} substitute. Swap with a ${teamLabel} player.`;
+          return false;
+        }
+
+        const activeList = assignedTeam === 'red' ? teamRed : teamYellow;
+        activeList[activeEntry.index] = stripBenchTeam(benchEntry.player);
+        bench[benchEntry.index] = { ...activeEntry.player, benchTeam: assignedTeam };
+        populateGoalscorerDropdowns();
+        return true;
+      }
+
+      const firstList = first.location === 'red' ? teamRed : teamYellow;
+      const secondList = second.location === 'red' ? teamRed : teamYellow;
+      firstList[first.index] = second.player;
+      secondList[second.index] = first.player;
       populateGoalscorerDropdowns();
+      return true;
     }
 
     function switchTab(tab) {
