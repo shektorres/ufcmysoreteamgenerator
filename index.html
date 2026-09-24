@@ -1796,35 +1796,26 @@
         const val = document.getElementById('selectRedGoalscorer').value;
         if (!val) return;
         redGoalscorers.push(val);
-        scoreRed++;
-        document.getElementById('scoreDisplayRed').textContent = scoreRed;
-        renderGoalscorers();
       } else {
         const val = document.getElementById('selectYellowGoalscorer').value;
         if (!val) return;
         yellowGoalscorers.push(val);
-        scoreYellow++;
-        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
-        renderGoalscorers();
       }
+      renderGoalscorers();
+    }
 
-      function addOwnGoalscorer(team) {
-        if (!isAdmin) return;
-        const selectId = team === 'red' ? 'selectRedOwnGoalscorer' : 'selectYellowOwnGoalscorer';
-        const val = document.getElementById(selectId).value;
-        if (!val) return;
+    function addOwnGoalscorer(team) {
+      if (!isAdmin) return;
+      const selectId = team === 'red' ? 'selectRedOwnGoalscorer' : 'selectYellowOwnGoalscorer';
+      const val = document.getElementById(selectId).value;
+      if (!val) return;
 
-        if (team === 'red') {
-          redOwnGoalscorers.push(val);
-          scoreYellow++;
-        } else {
-          yellowOwnGoalscorers.push(val);
-          scoreRed++;
-        }
-        document.getElementById('scoreDisplayRed').textContent = scoreRed;
-        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
-        renderGoalscorers();
+      if (team === 'red') {
+        redOwnGoalscorers.push(val);
+      } else {
+        yellowOwnGoalscorers.push(val);
       }
+      renderGoalscorers();
     }
 
     function removeGoalscorer(team, index) {
@@ -1836,20 +1827,16 @@
         yellowGoalscorers.splice(index, 1);
         renderGoalscorers();
       }
+    }
 
-      function removeOwnGoalscorer(team, index) {
-        if (!isAdmin) return;
-        if (team === 'red') {
-          redOwnGoalscorers.splice(index, 1);
-          scoreYellow = Math.max(0, scoreYellow - 1);
-        } else {
-          yellowOwnGoalscorers.splice(index, 1);
-          scoreRed = Math.max(0, scoreRed - 1);
-        }
-        document.getElementById('scoreDisplayRed').textContent = scoreRed;
-        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
-        renderGoalscorers();
+    function removeOwnGoalscorer(team, index) {
+      if (!isAdmin) return;
+      if (team === 'red') {
+        redOwnGoalscorers.splice(index, 1);
+      } else {
+        yellowOwnGoalscorers.splice(index, 1);
       }
+      renderGoalscorers();
     }
 
     function renderGoalscorers() {
