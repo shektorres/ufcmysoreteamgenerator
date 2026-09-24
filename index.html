@@ -2318,9 +2318,11 @@
 
     /* EXPORT FORMATTER */
     function openExportModal() {
-      const redNames = teamRed.map(p => `• ${p.name} (${p.position})`).join('\n');
-      const yellowNames = teamYellow.map(p => `• ${p.name} (${p.position})`).join('\n');
-      const benchNames = bench.length > 0 ? bench.map(p => `• ${p.name} (${p.position})`).join('\n') : '• None';
+      const redNames = sortPlayersByPosition(teamRed).map(p => `• ${p.name} (${p.position})`).join('\n');
+      const yellowNames = sortPlayersByPosition(teamYellow).map(p => `• ${p.name} (${p.position})`).join('\n');
+      const benchNames = bench.length > 0
+        ? sortPlayersByPosition(bench).map(p => `• ${p.name} (${p.position})`).join('\n')
+        : '• None';
 
       const exportText = `⚽ *UFC MYSORE MATCHDAY LINEUP* ⚽\n📅 Date: ${selectedMatchDate}\n\n🔴 *UFC MYSORE RED*\n${redNames}\n\n🟡 *UFC MYSORE YELLOW*\n${yellowNames}\n\n🔄 *SUBSTITUTES / BENCH*\n${benchNames}`;
 
