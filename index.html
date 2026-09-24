@@ -507,6 +507,18 @@
               <div id="redGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
                 <!-- Logged Red Goalscorers -->
               </div>
+              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Red Player)</label>
+                <div class="flex gap-2">
+                  <select id="selectRedOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
+                    <option value="">Select Red Player...</option>
+                  </select>
+                  <button onclick="addOwnGoalscorer('red')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <div id="redOwnGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[20px]"></div>
             </div>
           </div>
 
@@ -555,6 +567,18 @@
               <div id="yellowGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
                 <!-- Logged Yellow Goalscorers -->
               </div>
+              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Yellow Player)</label>
+                <div class="flex gap-2">
+                  <select id="selectYellowOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Select Yellow Player...</option>
+                  </select>
+                  <button onclick="addOwnGoalscorer('yellow')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <div id="yellowOwnGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[20px]"></div>
             </div>
           </div>
 
@@ -951,6 +975,15 @@
       return player.position === 'DEF' ? 'FB' : 'WNG';
     }
 
+    function getPlayerTeamStrength(player) {
+      const matches = player.mp || 0;
+      const winRate = matches > 0 ? (player.wins || 0) / matches : 0;
+      const goalRate = matches > 0 ? (player.goals || 0) / matches : 0;
+      const goalDiffRate = matches > 0 ? ((player.gf || 0) - (player.ga || 0)) / matches : 0;
+      const performance = (winRate * 20) + (Math.min(goalRate, 3) * 4) + (Math.max(-2, Math.min(goalDiffRate, 2)) * 2);
+      return (TIER_POINTS[player.tier] || 0) + performance;
+    }
+
     let players = [];
     let teamRed = [];
     let teamYellow = [];
@@ -966,6 +999,8 @@
     let scoreYellow = 0;
     let redGoalscorers = [];
     let yellowGoalscorers = [];
+    let redOwnGoalscorers = [];
+    let yellowOwnGoalscorers = [];
     let selectedMatchDate = new Date().toISOString().split('T')[0];
     let matchHistory = [];
 
@@ -1337,6 +1372,7 @@
     }
 
     function generateBalancedTeams() {
+      recalculatePlayerStats();
       const selected = players.filter(p => p.selected);
 
       if (selected.length < 2) {
@@ -1373,8 +1409,8 @@
         const gkB = candidateB.filter(p => p.position === 'GK').length;
         let gkPenalty = (gkA + gkB >= 2) ? Math.abs(gkA - gkB) * 10000 : 0;
 
-        const skillA = candidateA.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
-        const skillB = candidateB.reduce((s, p) => s + TIER_POINTS[p.tier], 0);
+        const skillA = candidateA.reduce((s, p) => s + getPlayerTeamStrength(p), 0);
+        const skillB = candidateB.reduce((s, p) => s + getPlayerTeamStrength(p), 0);
         const skillDiff = Math.abs(skillA - skillB);
 
         const cbA = candidateA.filter(p => p.position === 'CB').length;
@@ -1415,20 +1451,20 @@
     function assignBenchTeams(benchPool) {
       let redCount = teamRed.length;
       let yellowCount = teamYellow.length;
-      let redSkill = teamRed.reduce((sum, p) => sum + TIER_POINTS[p.tier], 0);
-      let yellowSkill = teamYellow.reduce((sum, p) => sum + TIER_POINTS[p.tier], 0);
+      let redSkill = teamRed.reduce((sum, p) => sum + getPlayerTeamStrength(p), 0);
+      let yellowSkill = teamYellow.reduce((sum, p) => sum + getPlayerTeamStrength(p), 0);
 
       return benchPool
         .slice()
-        .sort((a, b) => POSITION_RANK[a.position] - POSITION_RANK[b.position] || a.tier - b.tier || a.name.localeCompare(b.name))
+        .sort((a, b) => POSITION_RANK[a.position] - POSITION_RANK[b.position] || getPlayerTeamStrength(b) - getPlayerTeamStrength(a) || a.name.localeCompare(b.name))
         .map(p => {
           const benchTeam = redCount < yellowCount || (redCount === yellowCount && redSkill <= yellowSkill) ? 'red' : 'yellow';
           if (benchTeam === 'red') {
             redCount++;
-            redSkill += TIER_POINTS[p.tier];
+            redSkill += getPlayerTeamStrength(p);
           } else {
             yellowCount++;
-            yellowSkill += TIER_POINTS[p.tier];
+            yellowSkill += getPlayerTeamStrength(p);
           }
           return { ...p, benchTeam };
         });
@@ -1730,6 +1766,8 @@
     function populateGoalscorerDropdowns() {
       const redSelect = document.getElementById('selectRedGoalscorer');
       const yellowSelect = document.getElementById('selectYellowGoalscorer');
+      const redOwnSelect = document.getElementById('selectRedOwnGoalscorer');
+      const yellowOwnSelect = document.getElementById('selectYellowOwnGoalscorer');
 
       redSelect.innerHTML = '<option value="">Select Red Player...</option>';
       teamRed.forEach(p => {
@@ -1739,6 +1777,16 @@
       yellowSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
       teamYellow.forEach(p => {
         yellowSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+
+      redOwnSelect.innerHTML = '<option value="">Select Red Player...</option>';
+      teamRed.forEach(p => {
+        redOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+
+      yellowOwnSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
+      teamYellow.forEach(p => {
+        yellowOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
     }
 
@@ -1759,6 +1807,24 @@
         document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
         renderGoalscorers();
       }
+
+      function addOwnGoalscorer(team) {
+        if (!isAdmin) return;
+        const selectId = team === 'red' ? 'selectRedOwnGoalscorer' : 'selectYellowOwnGoalscorer';
+        const val = document.getElementById(selectId).value;
+        if (!val) return;
+
+        if (team === 'red') {
+          redOwnGoalscorers.push(val);
+          scoreYellow++;
+        } else {
+          yellowOwnGoalscorers.push(val);
+          scoreRed++;
+        }
+        document.getElementById('scoreDisplayRed').textContent = scoreRed;
+        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
+        renderGoalscorers();
+      }
     }
 
     function removeGoalscorer(team, index) {
@@ -1768,6 +1834,20 @@
         renderGoalscorers();
       } else {
         yellowGoalscorers.splice(index, 1);
+        renderGoalscorers();
+      }
+
+      function removeOwnGoalscorer(team, index) {
+        if (!isAdmin) return;
+        if (team === 'red') {
+          redOwnGoalscorers.splice(index, 1);
+          scoreYellow = Math.max(0, scoreYellow - 1);
+        } else {
+          yellowOwnGoalscorers.splice(index, 1);
+          scoreRed = Math.max(0, scoreRed - 1);
+        }
+        document.getElementById('scoreDisplayRed').textContent = scoreRed;
+        document.getElementById('scoreDisplayYellow').textContent = scoreYellow;
         renderGoalscorers();
       }
     }
@@ -1787,6 +1867,20 @@
         <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-950/80 border border-amber-800/60 text-amber-300 text-[11px] font-bold">
           ⚽ ${name}
           ${isAdmin ? `<button onclick="removeGoalscorer('yellow', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
+
+      document.getElementById('redOwnGoalscorersList').innerHTML = redOwnGoalscorers.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/60 border border-red-800/50 text-red-300 text-[11px] font-bold">
+          ⚽ Own goal: ${name}
+          ${isAdmin ? `<button onclick="removeOwnGoalscorer('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
+
+      document.getElementById('yellowOwnGoalscorersList').innerHTML = yellowOwnGoalscorers.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-950/60 border border-amber-800/50 text-amber-300 text-[11px] font-bold">
+          ⚽ Own goal: ${name}
+          ${isAdmin ? `<button onclick="removeOwnGoalscorer('yellow', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
         </span>
       `).join('');
     }
@@ -2001,7 +2095,9 @@
         teamRed: teamRed.map(p => p.name),
         teamYellow: teamYellow.map(p => p.name),
         redGoals: [...redGoalscorers],
-        yellowGoals: [...yellowGoalscorers]
+        yellowGoals: [...yellowGoalscorers],
+        redOwnGoals: [...redOwnGoalscorers],
+        yellowOwnGoals: [...yellowOwnGoalscorers]
       };
 
       matchHistory.unshift(matchRecord);
@@ -2015,6 +2111,8 @@
       scoreYellow = 0;
       redGoalscorers = [];
       yellowGoalscorers = [];
+      redOwnGoalscorers = [];
+      yellowOwnGoalscorers = [];
       document.getElementById('scoreDisplayRed').textContent = '0';
       document.getElementById('scoreDisplayYellow').textContent = '0';
       renderGoalscorers();
@@ -2036,6 +2134,8 @@
 
         const redGoalsStr = (m.redGoals || []).length > 0 ? (m.redGoals || []).join(', ') : 'None';
         const yellowGoalsStr = (m.yellowGoals || []).length > 0 ? (m.yellowGoals || []).join(', ') : 'None';
+        const redOwnGoalsStr = (m.redOwnGoals || []).length > 0 ? (m.redOwnGoals || []).join(', ') : 'None';
+        const yellowOwnGoalsStr = (m.yellowOwnGoals || []).length > 0 ? (m.yellowOwnGoals || []).join(', ') : 'None';
 
         item.innerHTML = `
           <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
@@ -2057,6 +2157,8 @@
           <div class="text-[11px] text-slate-400 space-y-0.5 pt-1 border-t border-slate-800/60">
             <div><strong class="text-red-400">Red Scored:</strong> ${redGoalsStr}</div>
             <div><strong class="text-amber-400">Yellow Scored:</strong> ${yellowGoalsStr}</div>
+            <div><strong class="text-red-300">Red Own Goals:</strong> ${redOwnGoalsStr}</div>
+            <div><strong class="text-amber-300">Yellow Own Goals:</strong> ${yellowOwnGoalsStr}</div>
           </div>
         `;
         container.appendChild(item);
