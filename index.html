@@ -508,12 +508,12 @@
                 <!-- Logged Red Goalscorers -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
-                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Red Player)</label>
+                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Yellow Player)</label>
                 <div class="flex gap-2">
                   <select id="selectRedOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
-                    <option value="">Select Red Player...</option>
+                    <option value="">Select Yellow Player...</option>
                   </select>
-                  <button onclick="addOwnGoalscorer('red')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
+                  <button onclick="addOwnGoalscorer('yellow', 'selectRedOwnGoalscorer')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
                     Add
                   </button>
                 </div>
@@ -567,12 +567,12 @@
                 <!-- Logged Yellow Goalscorers -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
-                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Yellow Player)</label>
+                <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Red Player)</label>
                 <div class="flex gap-2">
                   <select id="selectYellowOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                    <option value="">Select Yellow Player...</option>
+                    <option value="">Select Red Player...</option>
                   </select>
-                  <button onclick="addOwnGoalscorer('yellow')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
+                  <button onclick="addOwnGoalscorer('red', 'selectYellowOwnGoalscorer')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
                     Add
                   </button>
                 </div>
@@ -1778,13 +1778,13 @@
         yellowSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
-      redOwnSelect.innerHTML = '<option value="">Select Red Player...</option>';
-      teamRed.forEach(p => {
+      redOwnSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
+      teamYellow.forEach(p => {
         redOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
-      yellowOwnSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
-      teamYellow.forEach(p => {
+      yellowOwnSelect.innerHTML = '<option value="">Select Red Player...</option>';
+      teamRed.forEach(p => {
         yellowOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
     }
@@ -1803,10 +1803,10 @@
       renderGoalscorers();
     }
 
-    function addOwnGoalscorer(team) {
+    function addOwnGoalscorer(team, selectId = null) {
       if (!isAdmin) return;
-      const selectId = team === 'red' ? 'selectRedOwnGoalscorer' : 'selectYellowOwnGoalscorer';
-      const val = document.getElementById(selectId).value;
+      const scorerSelectId = selectId || (team === 'red' ? 'selectRedOwnGoalscorer' : 'selectYellowOwnGoalscorer');
+      const val = document.getElementById(scorerSelectId).value;
       if (!val) return;
 
       if (team === 'red') {
