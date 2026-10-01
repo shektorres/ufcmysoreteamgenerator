@@ -1894,6 +1894,20 @@
       `).join('');
     }
 
+    function normalizePlayerName(name) {
+      return typeof name === 'string' ? name.trim().replace(/\s+/g, ' ').toLowerCase() : '';
+    }
+
+    function matchIncludesPlayer(names, playerName) {
+      const normalizedPlayerName = normalizePlayerName(playerName);
+      return names.some(name => normalizePlayerName(name) === normalizedPlayerName);
+    }
+
+    function countPlayerGoals(goals, playerName) {
+      const normalizedPlayerName = normalizePlayerName(playerName);
+      return goals.filter(name => normalizePlayerName(name) === normalizedPlayerName).length;
+    }
+
     /* RECALCULATE PLAYER STATS DYNAMICALLY FROM MATCH HISTORY */
     function recalculatePlayerStats() {
       players.forEach(p => {
@@ -1912,8 +1926,8 @@
         const yellowNames = m.teamYellow || [];
 
         players.forEach(p => {
-          const inRed = redNames.includes(p.name);
-          const inYellow = yellowNames.includes(p.name);
+          const inRed = matchIncludesPlayer(redNames, p.name);
+          const inYellow = matchIncludesPlayer(yellowNames, p.name);
 
           if (inRed) {
             p.mp += 1;
@@ -1922,7 +1936,7 @@
             if (m.scoreRed > m.scoreYellow) p.wins += 1;
             if (m.scoreRed < m.scoreYellow) p.losses += 1;
             if (m.scoreRed === m.scoreYellow) p.draws += 1;
-            const indivGoals = (m.redGoals || []).filter(name => name === p.name).length;
+            const indivGoals = countPlayerGoals(m.redGoals || [], p.name);
             p.goals += indivGoals;
           } else if (inYellow) {
             p.mp += 1;
@@ -1931,12 +1945,12 @@
             if (m.scoreYellow > m.scoreRed) p.wins += 1;
             if (m.scoreYellow < m.scoreRed) p.losses += 1;
             if (m.scoreYellow === m.scoreRed) p.draws += 1;
-            const indivGoals = (m.yellowGoals || []).filter(name => name === p.name).length;
+            const indivGoals = countPlayerGoals(m.yellowGoals || [], p.name);
             p.goals += indivGoals;
           }
 
-          p.ownGoals += (m.redOwnGoals || []).filter(name => name === p.name).length;
-          p.ownGoals += (m.yellowOwnGoals || []).filter(name => name === p.name).length;
+          p.ownGoals += countPlayerGoals(m.redOwnGoals || [], p.name);
+          p.ownGoals += countPlayerGoals(m.yellowOwnGoals || [], p.name);
         });
       });
     }
@@ -2036,25 +2050,25 @@
         const redNames = m.teamRed || [];
         const yellowNames = m.teamYellow || [];
 
-        if (redNames.includes(name)) {
+        if (matchIncludesPlayer(redNames, name)) {
           stats.mp += 1;
           stats.gf += m.scoreRed;
           stats.ga += m.scoreYellow;
           if (m.scoreRed > m.scoreYellow) stats.wins += 1;
           if (m.scoreRed < m.scoreYellow) stats.losses += 1;
           if (m.scoreRed === m.scoreYellow) stats.draws += 1;
-          stats.goals += (m.redGoals || []).filter(n => n === name).length;
-        } else if (yellowNames.includes(name)) {
+          stats.goals += countPlayerGoals(m.redGoals || [], name);
+        } else if (matchIncludesPlayer(yellowNames, name)) {
           stats.mp += 1;
           stats.gf += m.scoreYellow;
           stats.ga += m.scoreRed;
           if (m.scoreYellow > m.scoreRed) stats.wins += 1;
           if (m.scoreYellow < m.scoreRed) stats.losses += 1;
           if (m.scoreYellow === m.scoreRed) stats.draws += 1;
-          stats.goals += (m.yellowGoals || []).filter(n => n === name).length;
+          stats.goals += countPlayerGoals(m.yellowGoals || [], name);
         }
-        stats.ownGoals += (m.redOwnGoals || []).filter(n => n === name).length;
-        stats.ownGoals += (m.yellowOwnGoals || []).filter(n => n === name).length;
+        stats.ownGoals += countPlayerGoals(m.redOwnGoals || [], name);
+        stats.ownGoals += countPlayerGoals(m.yellowOwnGoals || [], name);
       });
       return stats;
     }
