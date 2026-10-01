@@ -592,7 +592,7 @@
           </div>
           <div>
             <h3 class="text-sm font-black text-white">Player Records & Career Leaderboard</h3>
-            <p class="text-xs text-slate-400 mt-0.5">View individual goals, matches played, win rate, and goal difference</p>
+            <p class="text-xs text-slate-400 mt-0.5">View individual goals, matches played, wins, losses, draws, and goal difference</p>
           </div>
         </div>
 
@@ -638,7 +638,7 @@
             <i data-lucide="award" class="w-4 h-4 sm:w-5 sm:h-5 text-amber-400"></i>
             Player Records & Career Statistics
           </h3>
-          <p class="text-[11px] sm:text-xs text-slate-400">Alphabetically sorted; synced live with recorded match history</p>
+          <p class="text-[11px] sm:text-xs text-slate-400">Search and sort every column; synced live with recorded match history</p>
         </div>
         
         <div class="flex items-center gap-2">
@@ -652,24 +652,45 @@
       </div>
 
       <!-- Quick Search inside Modal for Mobile Convenience -->
-      <div class="p-3 sm:p-4 bg-slate-950/60 border-b border-slate-800/80 flex items-center justify-between gap-3">
+      <div class="p-3 sm:p-4 bg-slate-950/60 border-b border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="relative flex-1 sm:max-w-xs min-w-0">
           <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500 pointer-events-none"></i>
           <input type="text" id="leaderboardSearch" oninput="renderPlayerHistory()" placeholder="Filter player stats..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
         </div>
-        <span class="text-[11px] text-slate-500 hidden sm:inline">📊 Sorted A to Z</span>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <label for="leaderboardSort" class="text-[11px] text-slate-500 font-bold shrink-0">Sort by</label>
+          <select id="leaderboardSort" onchange="renderPlayerHistory()" class="flex-1 sm:w-40 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+            <option value="name">Player</option>
+            <option value="position">Position</option>
+            <option value="mp">Matches Played</option>
+            <option value="wins">Wins</option>
+            <option value="losses">Losses</option>
+            <option value="draws">Draws</option>
+            <option value="goals">Individual Goals</option>
+            <option value="ownGoals">Own Goals</option>
+            <option value="gf">Team Goals</option>
+            <option value="ga">Team Conceded</option>
+            <option value="gd">Goal Difference</option>
+          </select>
+          <button id="leaderboardSortDirection" type="button" data-direction="asc" onclick="toggleLeaderboardSortDirection()" aria-label="Sort ascending" title="Sort ascending" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-bold transition shrink-0">
+            <span id="leaderboardSortDirectionIcon">↑</span>
+            <span id="leaderboardSortDirectionLabel" class="hidden xs:inline">Asc</span>
+          </button>
+        </div>
       </div>
 
       <!-- Modal Body Scrollable Table Container -->
       <div class="p-3 sm:p-5 overflow-y-auto flex-1">
         <div class="overflow-x-auto rounded-xl border border-slate-800/80">
-          <table class="w-full text-left text-xs text-slate-300 min-w-[580px]">
+          <table class="w-full text-left text-xs text-slate-300 min-w-[760px]">
             <thead class="bg-slate-950 text-[11px] uppercase tracking-wider text-slate-400 font-mono border-b border-slate-800 sticky top-0 z-10 shadow-sm">
               <tr>
                 <th class="py-3 px-3">Player</th>
                 <th class="py-3 px-3">Pos</th>
                 <th class="py-3 px-3 text-center">Matches Played (MP)</th>
                 <th class="py-3 px-3 text-center">Wins (W)</th>
+                <th class="py-3 px-3 text-center text-red-400">Losses (L)</th>
+                <th class="py-3 px-3 text-center text-slate-300">Draws (D)</th>
                 <th class="py-3 px-3 text-center text-amber-400">Individual Goals</th>
                 <th class="py-3 px-3 text-center text-red-300">Own Goals</th>
                 <th class="py-3 px-3 text-center">Team Goals (GF)</th>
@@ -1157,7 +1178,7 @@
 
     function normalizeRoster(roster) {
       return roster.map(p => ({
-        baseMp: 0, baseWins: 0, baseGoals: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0,
+        baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0,
         ...p,
         position: normalizePlayerPosition(p)
       }));
@@ -1878,6 +1899,8 @@
       players.forEach(p => {
         p.mp = p.baseMp || 0;
         p.wins = p.baseWins || 0;
+        p.losses = p.baseLosses || 0;
+        p.draws = p.baseDraws || 0;
         p.goals = p.baseGoals || 0;
         p.ownGoals = p.baseOwnGoals || 0;
         p.gf = p.baseGf || 0;
@@ -1897,6 +1920,8 @@
             p.gf += m.scoreRed;
             p.ga += m.scoreYellow;
             if (m.scoreRed > m.scoreYellow) p.wins += 1;
+            if (m.scoreRed < m.scoreYellow) p.losses += 1;
+            if (m.scoreRed === m.scoreYellow) p.draws += 1;
             const indivGoals = (m.redGoals || []).filter(name => name === p.name).length;
             p.goals += indivGoals;
           } else if (inYellow) {
@@ -1904,6 +1929,8 @@
             p.gf += m.scoreYellow;
             p.ga += m.scoreRed;
             if (m.scoreYellow > m.scoreRed) p.wins += 1;
+            if (m.scoreYellow < m.scoreRed) p.losses += 1;
+            if (m.scoreYellow === m.scoreRed) p.draws += 1;
             const indivGoals = (m.yellowGoals || []).filter(name => name === p.name).length;
             p.goals += indivGoals;
           }
@@ -1915,6 +1942,17 @@
     }
 
     /* PLAYER CAREER HISTORY & LEADERBOARD LOGIC */
+    function toggleLeaderboardSortDirection() {
+      const button = document.getElementById('leaderboardSortDirection');
+      const nextDirection = button.dataset.direction === 'asc' ? 'desc' : 'asc';
+      button.dataset.direction = nextDirection;
+      button.setAttribute('aria-label', nextDirection === 'asc' ? 'Sort ascending' : 'Sort descending');
+      button.title = nextDirection === 'asc' ? 'Sort ascending' : 'Sort descending';
+      document.getElementById('leaderboardSortDirectionIcon').textContent = nextDirection === 'asc' ? '↑' : '↓';
+      document.getElementById('leaderboardSortDirectionLabel').textContent = nextDirection === 'asc' ? 'Asc' : 'Desc';
+      renderPlayerHistory();
+    }
+
     function renderPlayerHistory() {
       recalculatePlayerStats();
 
@@ -1924,18 +1962,35 @@
 
       const searchInput = document.getElementById('leaderboardSearch');
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-
-      const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name));
-      const filtered = sorted.filter(p => p.name.toLowerCase().includes(query) || p.position.toLowerCase().includes(query));
+      const sortField = document.getElementById('leaderboardSort')?.value || 'name';
+      const sortDirection = document.getElementById('leaderboardSortDirection')?.dataset.direction || 'asc';
+      const getSortValue = player => {
+        if (sortField === 'gd') return (player.gf || 0) - (player.ga || 0);
+        return player[sortField] ?? 0;
+      };
+      const filtered = players
+        .filter(p => p.name.toLowerCase().includes(query) || p.position.toLowerCase().includes(query))
+        .sort((a, b) => {
+          const aValue = getSortValue(a);
+          const bValue = getSortValue(b);
+          const comparison = typeof aValue === 'string'
+            ? aValue.localeCompare(bValue)
+            : aValue - bValue;
+          return comparison === 0
+            ? a.name.localeCompare(b.name)
+            : comparison * (sortDirection === 'asc' ? 1 : -1);
+        });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="11" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
         return;
       }
 
       filtered.forEach(p => {
         const mp = p.mp || 0;
         const wins = p.wins || 0;
+        const losses = p.losses || 0;
+        const draws = p.draws || 0;
         const goals = p.goals || 0;
         const ownGoals = p.ownGoals || 0;
         const gf = p.gf || 0;
@@ -1953,6 +2008,8 @@
           <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">${p.position}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-200">${mp}</td>
           <td class="py-2.5 px-3 text-center font-mono text-emerald-400 font-bold">${wins}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-red-400 font-bold">${losses}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-300 font-bold">${draws}</td>
           <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black">${goals}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-300 font-black">${ownGoals}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-300">${gf}</td>
@@ -1974,7 +2031,7 @@
     }
 
     function getMatchStatsForPlayer(name) {
-      const stats = { mp: 0, wins: 0, goals: 0, ownGoals: 0, gf: 0, ga: 0 };
+      const stats = { mp: 0, wins: 0, losses: 0, draws: 0, goals: 0, ownGoals: 0, gf: 0, ga: 0 };
       matchHistory.forEach(m => {
         const redNames = m.teamRed || [];
         const yellowNames = m.teamYellow || [];
@@ -1984,12 +2041,16 @@
           stats.gf += m.scoreRed;
           stats.ga += m.scoreYellow;
           if (m.scoreRed > m.scoreYellow) stats.wins += 1;
+          if (m.scoreRed < m.scoreYellow) stats.losses += 1;
+          if (m.scoreRed === m.scoreYellow) stats.draws += 1;
           stats.goals += (m.redGoals || []).filter(n => n === name).length;
         } else if (yellowNames.includes(name)) {
           stats.mp += 1;
           stats.gf += m.scoreYellow;
           stats.ga += m.scoreRed;
           if (m.scoreYellow > m.scoreRed) stats.wins += 1;
+          if (m.scoreYellow < m.scoreRed) stats.losses += 1;
+          if (m.scoreYellow === m.scoreRed) stats.draws += 1;
           stats.goals += (m.yellowGoals || []).filter(n => n === name).length;
         }
         stats.ownGoals += (m.redOwnGoals || []).filter(n => n === name).length;
@@ -2001,6 +2062,7 @@
     function renderAdminPlayerStatsTable() {
       const container = document.getElementById('adminPlayerStatsTable');
       container.innerHTML = '';
+      recalculatePlayerStats();
 
       players.forEach(p => {
         const row = document.createElement('div');
@@ -2012,7 +2074,7 @@
             <span class="text-[10px] text-slate-400">(${p.position})</span>
           </div>
           
-          <div class="sm:col-span-9 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-6 gap-2">
+          <div class="sm:col-span-9 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-8 gap-2">
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Matches (MP)</label>
               <input type="number" min="0" value="${p.mp || 0}" onchange="updatePlayerStatVal('${p.id}', 'mp', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-300 font-mono text-xs focus:outline-none">
@@ -2020,6 +2082,14 @@
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Wins (W)</label>
               <input type="number" min="0" value="${p.wins || 0}" onchange="updatePlayerStatVal('${p.id}', 'wins', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-emerald-400 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Losses (L)</label>
+              <input type="number" min="0" value="${p.losses || 0}" onchange="updatePlayerStatVal('${p.id}', 'losses', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-red-400 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Draws (D)</label>
+              <input type="number" min="0" value="${p.draws || 0}" onchange="updatePlayerStatVal('${p.id}', 'draws', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 font-mono text-xs focus:outline-none">
             </div>
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Indiv Goals</label>
@@ -2256,6 +2326,8 @@
         selected: true,
         baseMp: 0,
         baseWins: 0,
+        baseLosses: 0,
+        baseDraws: 0,
         baseGoals: 0,
         baseOwnGoals: 0,
         baseGf: 0,
