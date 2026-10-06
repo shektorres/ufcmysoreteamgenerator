@@ -508,6 +508,21 @@
                 <!-- Logged Red Goalscorers -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Assist (Red)</label>
+                <div class="flex gap-2">
+                  <select id="selectRedAssist" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
+                    <option value="">Select Red Player...</option>
+                  </select>
+                  <button onclick="addAssist('red')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Assists (Red)</p>
+              <div id="redAssistsList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
+                <!-- Logged Red Assists -->
+              </div>
+              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
                 <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Yellow Player)</label>
                 <div class="flex gap-2">
                   <select id="selectRedOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
@@ -565,6 +580,21 @@
               <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Goalscorers (Yellow)</p>
               <div id="yellowGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
                 <!-- Logged Yellow Goalscorers -->
+              </div>
+              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
+                <label class="text-[11px] font-bold text-slate-400 block">Log Assist (Yellow)</label>
+                <div class="flex gap-2">
+                  <select id="selectYellowAssist" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                    <option value="">Select Yellow Player...</option>
+                  </select>
+                  <button onclick="addAssist('yellow')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
+                    Add
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Assists (Yellow)</p>
+              <div id="yellowAssistsList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
+                <!-- Logged Yellow Assists -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
                 <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Red Player)</label>
@@ -662,11 +692,13 @@
           <select id="leaderboardSort" onchange="renderPlayerHistory()" class="flex-1 sm:w-40 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
             <option value="name">Player</option>
             <option value="position">Position</option>
+            <option value="points">Points</option>
             <option value="mp">Matches Played</option>
             <option value="wins">Wins</option>
             <option value="losses">Losses</option>
             <option value="draws">Draws</option>
             <option value="goals">Individual Goals</option>
+            <option value="assists">Assists</option>
             <option value="ownGoals">Own Goals</option>
             <option value="gf">Team Goals</option>
             <option value="ga">Team Conceded</option>
@@ -681,17 +713,51 @@
 
       <!-- Modal Body Scrollable Table Container -->
       <div class="p-3 sm:p-5 overflow-y-auto flex-1">
+        <details class="mb-3 rounded-xl border border-amber-500/25 bg-amber-500/5">
+          <summary class="cursor-pointer px-3 py-2 text-[11px] font-black uppercase tracking-wider text-amber-300">
+            How points are earned
+          </summary>
+          <div class="px-3 pb-3 pt-1 overflow-x-auto">
+            <table class="w-full text-left text-[11px] text-slate-300 min-w-[520px]">
+              <thead class="text-[10px] uppercase tracking-wider text-slate-500 font-mono border-b border-slate-800">
+                <tr>
+                  <th class="py-1.5 pr-3">Action</th>
+                  <th class="py-1.5 px-2 text-center">Attacker</th>
+                  <th class="py-1.5 px-2 text-center">Midfielder</th>
+                  <th class="py-1.5 px-2 text-center">Fullback</th>
+                  <th class="py-1.5 px-2 text-center">Centerback</th>
+                  <th class="py-1.5 px-2 text-center">Goalkeeper</th>
+                </tr>
+              </thead>
+              <tbody class="font-mono divide-y divide-slate-800/60">
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Goal scored</td><td class="text-center text-emerald-400">+4</td><td class="text-center text-emerald-400">+5</td><td class="text-center text-emerald-400">+6</td><td class="text-center text-emerald-400">+7</td><td class="text-center text-emerald-400">+8</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Clean sheet (0 conceded)</td><td class="text-center text-slate-500">0</td><td class="text-center text-emerald-400">+1</td><td class="text-center text-emerald-400">+4</td><td class="text-center text-emerald-400">+5</td><td class="text-center text-emerald-400">+7</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Conceded 1–3</td><td class="text-center text-slate-500">0</td><td class="text-center text-emerald-400">+1</td><td class="text-center text-emerald-400">+2</td><td class="text-center text-emerald-400">+3</td><td class="text-center text-emerald-400">+4</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Conceded 4–5</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Conceded 6+</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td><td class="text-center text-red-400">-2</td><td class="text-center text-red-400">-3</td><td class="text-center text-red-400">-4</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Assist</td><td colspan="5" class="text-center text-emerald-400">+3</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Hat-trick (3 goals)</td><td colspan="5" class="text-center text-emerald-400">+3 <span class="font-sans text-slate-500">(then +1 per goal beyond the 3rd)</span></td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Own goal</td><td colspan="5" class="text-center text-red-400">-2</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Win</td><td colspan="5" class="text-center text-emerald-400">+3</td></tr>
+                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Draw</td><td colspan="5" class="text-center text-emerald-400">+1</td></tr>
+              </tbody>
+            </table>
+            <p class="pt-2 text-[10px] text-slate-500">Attacker = Striker &amp; Winger. Conceding bands are exclusive — a clean sheet pays the clean-sheet rate only.</p>
+          </div>
+        </details>
         <div class="overflow-x-auto rounded-xl border border-slate-800/80">
-          <table class="w-full text-left text-xs text-slate-300 min-w-[760px]">
+          <table class="w-full text-left text-xs text-slate-300 min-w-[900px]">
             <thead class="bg-slate-950 text-[11px] uppercase tracking-wider text-slate-400 font-mono border-b border-slate-800 sticky top-0 z-10 shadow-sm">
               <tr>
                 <th class="py-3 px-3">Player</th>
                 <th class="py-3 px-3">Pos</th>
+                <th class="py-3 px-3 text-center text-amber-300">Points (PTS)</th>
                 <th class="py-3 px-3 text-center">Matches Played (MP)</th>
                 <th class="py-3 px-3 text-center">Wins (W)</th>
                 <th class="py-3 px-3 text-center text-red-400">Losses (L)</th>
                 <th class="py-3 px-3 text-center text-slate-300">Draws (D)</th>
                 <th class="py-3 px-3 text-center text-amber-400">Individual Goals</th>
+                <th class="py-3 px-3 text-center text-sky-400">Assists (A)</th>
                 <th class="py-3 px-3 text-center text-red-300">Own Goals</th>
                 <th class="py-3 px-3 text-center">Team Goals (GF)</th>
                 <th class="py-3 px-3 text-center">Team Conceded (GA)</th>
@@ -1004,6 +1070,50 @@
       return (TIER_POINTS[player.tier] || 0) + performance;
     }
 
+    /* POSITION-BASED FANTASY POINT SYSTEM */
+    const POINTS_POSITION_GROUP = { GK: 'GK', CB: 'CB', FB: 'FB', MID: 'MID', WNG: 'ATT', ST: 'ATT' };
+    const POINTS_PER_GOAL = { ATT: 4, MID: 5, FB: 6, CB: 7, GK: 8 };
+    const POINTS_CLEAN_SHEET = { ATT: 0, MID: 1, FB: 4, CB: 5, GK: 7 };
+    const POINTS_CONCEDED_LOW = { ATT: 0, MID: 1, FB: 2, CB: 3, GK: 4 };
+    const POINTS_CONCEDED_HIGH = { ATT: 0, MID: 0, FB: -2, CB: -3, GK: -4 };
+    const POINTS_PER_ASSIST = 3;
+    const POINTS_PER_OWN_GOAL = -2;
+    const POINTS_HATTRICK = 3;
+    const POINTS_HATTRICK_EXTRA_GOAL = 1;
+    const POINTS_WIN = 3;
+    const POINTS_DRAW = 1;
+
+    function getPointsPositionGroup(position) {
+      return POINTS_POSITION_GROUP[position] || 'ATT';
+    }
+
+    // 3 goals earn the hat-trick bonus, with +1 for every goal beyond the third.
+    function calculateGoalPoints(group, goals) {
+      if (goals <= 0) return 0;
+      let total = goals * (POINTS_PER_GOAL[group] ?? 0);
+      if (goals >= 3) total += POINTS_HATTRICK + ((goals - 3) * POINTS_HATTRICK_EXTRA_GOAL);
+      return total;
+    }
+
+    // Conceding tiers are exclusive: a clean sheet never also pays the "3 or less" bonus.
+    function calculateConcededPoints(group, conceded) {
+      if (conceded <= 0) return POINTS_CLEAN_SHEET[group] ?? 0;
+      if (conceded <= 3) return POINTS_CONCEDED_LOW[group] ?? 0;
+      if (conceded >= 6) return POINTS_CONCEDED_HIGH[group] ?? 0;
+      return 0;
+    }
+
+    function calculateMatchPoints({ position, goals = 0, assists = 0, ownGoals = 0, conceded = 0, result = 'loss' }) {
+      const group = getPointsPositionGroup(position);
+      let total = calculateGoalPoints(group, goals);
+      total += assists * POINTS_PER_ASSIST;
+      total += ownGoals * POINTS_PER_OWN_GOAL;
+      total += calculateConcededPoints(group, conceded);
+      if (result === 'win') total += POINTS_WIN;
+      else if (result === 'draw') total += POINTS_DRAW;
+      return total;
+    }
+
     let players = [];
     let teamRed = [];
     let teamYellow = [];
@@ -1021,6 +1131,8 @@
     let yellowGoalscorers = [];
     let redOwnGoalscorers = [];
     let yellowOwnGoalscorers = [];
+    let redAssists = [];
+    let yellowAssists = [];
     let selectedMatchDate = new Date().toISOString().split('T')[0];
     let matchHistory = [];
 
@@ -1178,7 +1290,7 @@
 
     function normalizeRoster(roster) {
       return roster.map(p => ({
-        baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0,
+        baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseAssists: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0, basePoints: 0,
         ...p,
         position: normalizePlayerPosition(p)
       }));
@@ -1794,6 +1906,8 @@
       const yellowSelect = document.getElementById('selectYellowGoalscorer');
       const redOwnSelect = document.getElementById('selectRedOwnGoalscorer');
       const yellowOwnSelect = document.getElementById('selectYellowOwnGoalscorer');
+      const redAssistSelect = document.getElementById('selectRedAssist');
+      const yellowAssistSelect = document.getElementById('selectYellowAssist');
 
       redSelect.innerHTML = '<option value="">Select Red Player...</option>';
       teamRed.forEach(p => {
@@ -1814,6 +1928,40 @@
       teamRed.forEach(p => {
         yellowOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
+
+      redAssistSelect.innerHTML = '<option value="">Select Red Player...</option>';
+      teamRed.forEach(p => {
+        redAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+
+      yellowAssistSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
+      teamYellow.forEach(p => {
+        yellowAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
+      });
+    }
+
+    function addAssist(team) {
+      if (!isAdmin) return;
+      const selectId = team === 'red' ? 'selectRedAssist' : 'selectYellowAssist';
+      const val = document.getElementById(selectId).value;
+      if (!val) return;
+
+      if (team === 'red') {
+        redAssists.push(val);
+      } else {
+        yellowAssists.push(val);
+      }
+      renderGoalscorers();
+    }
+
+    function removeAssist(team, index) {
+      if (!isAdmin) return;
+      if (team === 'red') {
+        redAssists.splice(index, 1);
+      } else {
+        yellowAssists.splice(index, 1);
+      }
+      renderGoalscorers();
     }
 
     function addGoalscorer(team) {
@@ -1892,6 +2040,28 @@
           ${isAdmin ? `<button onclick="removeOwnGoalscorer('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
         </span>
       `).join('');
+
+      renderAssists();
+    }
+
+    function renderAssists() {
+      const redContainer = document.getElementById('redAssistsList');
+      const yellowContainer = document.getElementById('yellowAssistsList');
+      if (!redContainer || !yellowContainer) return;
+
+      redContainer.innerHTML = redAssists.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/50 border border-red-800/40 text-red-200 text-[11px] font-bold">
+          👟 ${name}
+          ${isAdmin ? `<button onclick="removeAssist('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
+
+      yellowContainer.innerHTML = yellowAssists.map((name, idx) => `
+        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-950/50 border border-amber-800/40 text-amber-200 text-[11px] font-bold">
+          👟 ${name}
+          ${isAdmin ? `<button onclick="removeAssist('yellow', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
+        </span>
+      `).join('');
     }
 
     function normalizePlayerName(name) {
@@ -1916,9 +2086,11 @@
         p.losses = p.baseLosses || 0;
         p.draws = p.baseDraws || 0;
         p.goals = p.baseGoals || 0;
+        p.assists = p.baseAssists || 0;
         p.ownGoals = p.baseOwnGoals || 0;
         p.gf = p.baseGf || 0;
         p.ga = p.baseGa || 0;
+        p.points = p.basePoints || 0;
       });
 
       matchHistory.forEach(m => {
@@ -1928,6 +2100,8 @@
         players.forEach(p => {
           const inRed = matchIncludesPlayer(redNames, p.name);
           const inYellow = matchIncludesPlayer(yellowNames, p.name);
+          const matchOwnGoals = countPlayerGoals(m.redOwnGoals || [], p.name)
+            + countPlayerGoals(m.yellowOwnGoals || [], p.name);
 
           if (inRed) {
             p.mp += 1;
@@ -1937,7 +2111,17 @@
             if (m.scoreRed < m.scoreYellow) p.losses += 1;
             if (m.scoreRed === m.scoreYellow) p.draws += 1;
             const indivGoals = countPlayerGoals(m.redGoals || [], p.name);
+            const indivAssists = countPlayerGoals(m.redAssists || [], p.name);
             p.goals += indivGoals;
+            p.assists += indivAssists;
+            p.points += calculateMatchPoints({
+              position: p.position,
+              goals: indivGoals,
+              assists: indivAssists,
+              ownGoals: matchOwnGoals,
+              conceded: m.scoreYellow,
+              result: m.scoreRed > m.scoreYellow ? 'win' : m.scoreRed === m.scoreYellow ? 'draw' : 'loss'
+            });
           } else if (inYellow) {
             p.mp += 1;
             p.gf += m.scoreYellow;
@@ -1946,11 +2130,20 @@
             if (m.scoreYellow < m.scoreRed) p.losses += 1;
             if (m.scoreYellow === m.scoreRed) p.draws += 1;
             const indivGoals = countPlayerGoals(m.yellowGoals || [], p.name);
+            const indivAssists = countPlayerGoals(m.yellowAssists || [], p.name);
             p.goals += indivGoals;
+            p.assists += indivAssists;
+            p.points += calculateMatchPoints({
+              position: p.position,
+              goals: indivGoals,
+              assists: indivAssists,
+              ownGoals: matchOwnGoals,
+              conceded: m.scoreRed,
+              result: m.scoreYellow > m.scoreRed ? 'win' : m.scoreYellow === m.scoreRed ? 'draw' : 'loss'
+            });
           }
 
-          p.ownGoals += countPlayerGoals(m.redOwnGoals || [], p.name);
-          p.ownGoals += countPlayerGoals(m.yellowOwnGoals || [], p.name);
+          p.ownGoals += matchOwnGoals;
         });
       });
     }
@@ -1996,7 +2189,7 @@
         });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="11" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
         return;
       }
 
@@ -2006,12 +2199,15 @@
         const losses = p.losses || 0;
         const draws = p.draws || 0;
         const goals = p.goals || 0;
+        const assists = p.assists || 0;
         const ownGoals = p.ownGoals || 0;
         const gf = p.gf || 0;
         const ga = p.ga || 0;
+        const points = p.points || 0;
         const gd = gf - ga;
         const gdSign = gd > 0 ? `+${gd}` : `${gd}`;
         const gdColor = gd > 0 ? 'text-emerald-400' : gd < 0 ? 'text-red-400' : 'text-slate-400';
+        const pointsColor = points > 0 ? 'text-amber-300' : points < 0 ? 'text-red-400' : 'text-slate-400';
 
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-900/50 transition border-b border-slate-800/40";
@@ -2020,11 +2216,13 @@
             <span>${p.name}</span>
           </td>
           <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">${p.position}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-black ${pointsColor}">${points}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-200">${mp}</td>
           <td class="py-2.5 px-3 text-center font-mono text-emerald-400 font-bold">${wins}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-400 font-bold">${losses}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-300 font-bold">${draws}</td>
           <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black">${goals}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-sky-400 font-black">${assists}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-300 font-black">${ownGoals}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-300">${gf}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-400">${ga}</td>
@@ -2045,10 +2243,15 @@
     }
 
     function getMatchStatsForPlayer(name) {
-      const stats = { mp: 0, wins: 0, losses: 0, draws: 0, goals: 0, ownGoals: 0, gf: 0, ga: 0 };
+      const stats = { mp: 0, wins: 0, losses: 0, draws: 0, goals: 0, assists: 0, ownGoals: 0, gf: 0, ga: 0, points: 0 };
+      const player = players.find(p => normalizePlayerName(p.name) === normalizePlayerName(name));
+      const position = player ? player.position : 'ATT';
+
       matchHistory.forEach(m => {
         const redNames = m.teamRed || [];
         const yellowNames = m.teamYellow || [];
+        const matchOwnGoals = countPlayerGoals(m.redOwnGoals || [], name)
+          + countPlayerGoals(m.yellowOwnGoals || [], name);
 
         if (matchIncludesPlayer(redNames, name)) {
           stats.mp += 1;
@@ -2057,7 +2260,18 @@
           if (m.scoreRed > m.scoreYellow) stats.wins += 1;
           if (m.scoreRed < m.scoreYellow) stats.losses += 1;
           if (m.scoreRed === m.scoreYellow) stats.draws += 1;
-          stats.goals += countPlayerGoals(m.redGoals || [], name);
+          const indivGoals = countPlayerGoals(m.redGoals || [], name);
+          const indivAssists = countPlayerGoals(m.redAssists || [], name);
+          stats.goals += indivGoals;
+          stats.assists += indivAssists;
+          stats.points += calculateMatchPoints({
+            position,
+            goals: indivGoals,
+            assists: indivAssists,
+            ownGoals: matchOwnGoals,
+            conceded: m.scoreYellow,
+            result: m.scoreRed > m.scoreYellow ? 'win' : m.scoreRed === m.scoreYellow ? 'draw' : 'loss'
+          });
         } else if (matchIncludesPlayer(yellowNames, name)) {
           stats.mp += 1;
           stats.gf += m.scoreYellow;
@@ -2065,10 +2279,20 @@
           if (m.scoreYellow > m.scoreRed) stats.wins += 1;
           if (m.scoreYellow < m.scoreRed) stats.losses += 1;
           if (m.scoreYellow === m.scoreRed) stats.draws += 1;
-          stats.goals += countPlayerGoals(m.yellowGoals || [], name);
+          const indivGoals = countPlayerGoals(m.yellowGoals || [], name);
+          const indivAssists = countPlayerGoals(m.yellowAssists || [], name);
+          stats.goals += indivGoals;
+          stats.assists += indivAssists;
+          stats.points += calculateMatchPoints({
+            position,
+            goals: indivGoals,
+            assists: indivAssists,
+            ownGoals: matchOwnGoals,
+            conceded: m.scoreRed,
+            result: m.scoreYellow > m.scoreRed ? 'win' : m.scoreYellow === m.scoreRed ? 'draw' : 'loss'
+          });
         }
-        stats.ownGoals += countPlayerGoals(m.redOwnGoals || [], name);
-        stats.ownGoals += countPlayerGoals(m.yellowOwnGoals || [], name);
+        stats.ownGoals += matchOwnGoals;
       });
       return stats;
     }
@@ -2088,7 +2312,7 @@
             <span class="text-[10px] text-slate-400">(${p.position})</span>
           </div>
           
-          <div class="sm:col-span-9 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-8 gap-2">
+          <div class="sm:col-span-9 grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Matches (MP)</label>
               <input type="number" min="0" value="${p.mp || 0}" onchange="updatePlayerStatVal('${p.id}', 'mp', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-300 font-mono text-xs focus:outline-none">
@@ -2110,6 +2334,10 @@
               <input type="number" min="0" value="${p.goals || 0}" onchange="updatePlayerStatVal('${p.id}', 'goals', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-400 font-mono text-xs focus:outline-none">
             </div>
             <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Assists (A)</label>
+              <input type="number" min="0" value="${p.assists || 0}" onchange="updatePlayerStatVal('${p.id}', 'assists', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-sky-400 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Own Goals</label>
               <input type="number" min="0" value="${p.ownGoals || 0}" onchange="updatePlayerStatVal('${p.id}', 'ownGoals', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-red-300 font-mono text-xs focus:outline-none">
             </div>
@@ -2120,6 +2348,10 @@
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Team GA</label>
               <input type="number" min="0" value="${p.ga || 0}" onchange="updatePlayerStatVal('${p.id}', 'ga', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-slate-300 font-mono text-xs focus:outline-none">
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block font-bold truncate">Points (PTS)</label>
+              <input type="number" value="${p.points || 0}" onchange="updatePlayerStatVal('${p.id}', 'points', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-300 font-mono text-xs focus:outline-none">
             </div>
           </div>
         `;
@@ -2181,7 +2413,9 @@
         redGoals: [...redGoalscorers],
         yellowGoals: [...yellowGoalscorers],
         redOwnGoals: [...redOwnGoalscorers],
-        yellowOwnGoals: [...yellowOwnGoalscorers]
+        yellowOwnGoals: [...yellowOwnGoalscorers],
+        redAssists: [...redAssists],
+        yellowAssists: [...yellowAssists]
       };
 
       matchHistory.unshift(matchRecord);
@@ -2197,6 +2431,8 @@
       yellowGoalscorers = [];
       redOwnGoalscorers = [];
       yellowOwnGoalscorers = [];
+      redAssists = [];
+      yellowAssists = [];
       document.getElementById('scoreDisplayRed').textContent = '0';
       document.getElementById('scoreDisplayYellow').textContent = '0';
       renderGoalscorers();
@@ -2220,6 +2456,8 @@
         const yellowGoalsStr = (m.yellowGoals || []).length > 0 ? (m.yellowGoals || []).join(', ') : 'None';
         const redOwnGoalsStr = (m.redOwnGoals || []).length > 0 ? (m.redOwnGoals || []).join(', ') : 'None';
         const yellowOwnGoalsStr = (m.yellowOwnGoals || []).length > 0 ? (m.yellowOwnGoals || []).join(', ') : 'None';
+        const redAssistsStr = (m.redAssists || []).length > 0 ? (m.redAssists || []).join(', ') : 'None';
+        const yellowAssistsStr = (m.yellowAssists || []).length > 0 ? (m.yellowAssists || []).join(', ') : 'None';
         const redTeamStr = (m.teamRed || []).length > 0 ? (m.teamRed || []).join(', ') : 'None';
         const yellowTeamStr = (m.teamYellow || []).length > 0 ? (m.teamYellow || []).join(', ') : 'None';
 
@@ -2245,6 +2483,8 @@
             <div><strong class="text-amber-400">Yellow Team:</strong> ${yellowTeamStr}</div>
             <div><strong class="text-red-400">Red Scored:</strong> ${redGoalsStr}</div>
             <div><strong class="text-amber-400">Yellow Scored:</strong> ${yellowGoalsStr}</div>
+            <div><strong class="text-sky-400">Red Assists:</strong> ${redAssistsStr}</div>
+            <div><strong class="text-sky-300">Yellow Assists:</strong> ${yellowAssistsStr}</div>
             <div><strong class="text-red-300">Red Own Goals:</strong> ${redOwnGoalsStr}</div>
             <div><strong class="text-amber-300">Yellow Own Goals:</strong> ${yellowOwnGoalsStr}</div>
           </div>
@@ -2343,9 +2583,11 @@
         baseLosses: 0,
         baseDraws: 0,
         baseGoals: 0,
+        baseAssists: 0,
         baseOwnGoals: 0,
         baseGf: 0,
-        baseGa: 0
+        baseGa: 0,
+        basePoints: 0
       };
 
       players.push(newP);
