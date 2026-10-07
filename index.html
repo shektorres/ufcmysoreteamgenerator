@@ -687,28 +687,6 @@
           <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500 pointer-events-none"></i>
           <input type="text" id="leaderboardSearch" oninput="renderPlayerHistory()" placeholder="Filter player stats..." class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-xl text-slate-200 focus:outline-none focus:border-amber-500">
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <label for="leaderboardSort" class="text-[11px] text-slate-500 font-bold shrink-0">Sort by</label>
-          <select id="leaderboardSort" onchange="renderPlayerHistory()" class="flex-1 sm:w-40 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-            <option value="name">Player</option>
-            <option value="position">Position</option>
-            <option value="points">Points</option>
-            <option value="mp">Matches Played</option>
-            <option value="wins">Wins</option>
-            <option value="losses">Losses</option>
-            <option value="draws">Draws</option>
-            <option value="goals">Individual Goals</option>
-            <option value="assists">Assists</option>
-            <option value="ownGoals">Own Goals</option>
-            <option value="gf">Team Goals</option>
-            <option value="ga">Team Conceded</option>
-            <option value="gd">Goal Difference</option>
-          </select>
-          <button id="leaderboardSortDirection" type="button" data-direction="asc" onclick="toggleLeaderboardSortDirection()" aria-label="Sort ascending" title="Sort ascending" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-bold transition shrink-0">
-            <span id="leaderboardSortDirectionIcon">↑</span>
-            <span id="leaderboardSortDirectionLabel" class="hidden xs:inline">Asc</span>
-          </button>
-        </div>
       </div>
 
       <!-- Modal Body Scrollable Table Container -->
@@ -747,20 +725,29 @@
         <div class="overflow-x-auto rounded-xl border border-slate-800/80">
           <table class="w-full text-left text-xs text-slate-300 min-w-[900px]">
             <thead class="bg-slate-950 text-[11px] uppercase tracking-wider text-slate-400 font-mono border-b border-slate-800 sticky top-0 z-10 shadow-sm">
+              <tr class="text-[9px] tracking-widest text-slate-600 border-b border-slate-800/60">
+                <th colspan="2" class="pt-2.5 pb-1 px-3 font-black">Player</th>
+                <th colspan="1" class="pt-2.5 pb-1 px-3 text-center font-black text-amber-500/70 border-l border-slate-800">Score</th>
+                <th colspan="4" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Record</th>
+                <th colspan="3" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Attacking</th>
+                <th colspan="3" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Team Goals</th>
+                <th colspan="1" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Rate</th>
+              </tr>
               <tr>
-                <th class="py-3 px-3">Player</th>
-                <th class="py-3 px-3">Pos</th>
-                <th class="py-3 px-3 text-center text-amber-300">Points (PTS)</th>
-                <th class="py-3 px-3 text-center">Matches Played (MP)</th>
-                <th class="py-3 px-3 text-center">Wins (W)</th>
-                <th class="py-3 px-3 text-center text-red-400">Losses (L)</th>
-                <th class="py-3 px-3 text-center text-slate-300">Draws (D)</th>
-                <th class="py-3 px-3 text-center text-amber-400">Individual Goals</th>
-                <th class="py-3 px-3 text-center text-sky-400">Assists (A)</th>
-                <th class="py-3 px-3 text-center text-red-300">Own Goals</th>
-                <th class="py-3 px-3 text-center">Team Goals (GF)</th>
-                <th class="py-3 px-3 text-center">Team Conceded (GA)</th>
-                <th class="py-3 px-3 text-center">Goal Diff (GD)</th>
+                <th data-sort-field="name" class="pb-3 pt-1 px-3"><button type="button" onclick="sortLeaderboardBy('name')" class="inline-flex items-center gap-1 text-left hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Player <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="position" class="pb-3 pt-1 px-3"><button type="button" onclick="sortLeaderboardBy('position')" class="inline-flex items-center gap-1 text-left hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Pos <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="points" class="pb-3 pt-1 px-3 text-center text-amber-300 border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('points')" class="inline-flex items-center gap-1 hover:text-amber-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Points (PTS) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="mp" class="pb-3 pt-1 px-3 text-center border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('mp')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Matches (MP) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="wins" class="pb-3 pt-1 px-3 text-center text-emerald-400"><button type="button" onclick="sortLeaderboardBy('wins')" class="inline-flex items-center gap-1 hover:text-emerald-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Wins (W) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="draws" class="pb-3 pt-1 px-3 text-center text-slate-300"><button type="button" onclick="sortLeaderboardBy('draws')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Draws (D) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="losses" class="pb-3 pt-1 px-3 text-center text-red-400"><button type="button" onclick="sortLeaderboardBy('losses')" class="inline-flex items-center gap-1 hover:text-red-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Losses (L) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="goals" class="pb-3 pt-1 px-3 text-center text-amber-400 border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('goals')" class="inline-flex items-center gap-1 hover:text-amber-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Goals <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="assists" class="pb-3 pt-1 px-3 text-center text-sky-400"><button type="button" onclick="sortLeaderboardBy('assists')" class="inline-flex items-center gap-1 hover:text-sky-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Assists (A) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="ownGoals" class="pb-3 pt-1 px-3 text-center text-red-300"><button type="button" onclick="sortLeaderboardBy('ownGoals')" class="inline-flex items-center gap-1 hover:text-red-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Own Goals <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="gf" class="pb-3 pt-1 px-3 text-center border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('gf')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Scored (GF) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="ga" class="pb-3 pt-1 px-3 text-center"><button type="button" onclick="sortLeaderboardBy('ga')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Conceded (GA) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="gd" class="pb-3 pt-1 px-3 text-center"><button type="button" onclick="sortLeaderboardBy('gd')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Diff (GD) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
+                <th data-sort-field="winPct" class="pb-3 pt-1 px-3 text-center text-emerald-300 border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('winPct')" class="inline-flex items-center gap-1 hover:text-emerald-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Win % <span data-sort-indicator aria-hidden="true">↕</span></button></th>
               </tr>
             </thead>
             <tbody id="playerHistoryTableBody" class="divide-y divide-slate-800/60 font-medium">
@@ -2148,15 +2135,38 @@
     }
 
     /* PLAYER CAREER HISTORY & LEADERBOARD LOGIC */
-    function toggleLeaderboardSortDirection() {
-      const button = document.getElementById('leaderboardSortDirection');
-      const nextDirection = button.dataset.direction === 'asc' ? 'desc' : 'asc';
-      button.dataset.direction = nextDirection;
-      button.setAttribute('aria-label', nextDirection === 'asc' ? 'Sort ascending' : 'Sort descending');
-      button.title = nextDirection === 'asc' ? 'Sort ascending' : 'Sort descending';
-      document.getElementById('leaderboardSortDirectionIcon').textContent = nextDirection === 'asc' ? '↑' : '↓';
-      document.getElementById('leaderboardSortDirectionLabel').textContent = nextDirection === 'asc' ? 'Asc' : 'Desc';
+    let leaderboardSortField = 'name';
+    let leaderboardSortDirection = 'asc';
+
+    function getPlayerWinPct(player) {
+      const matches = player.mp || 0;
+      return matches > 0 ? ((player.wins || 0) / matches) * 100 : 0;
+    }
+
+    function sortLeaderboardBy(field) {
+      leaderboardSortDirection = leaderboardSortField === field
+        ? (leaderboardSortDirection === 'asc' ? 'desc' : 'asc')
+        : (field === 'name' || field === 'position' ? 'asc' : 'desc');
+      leaderboardSortField = field;
       renderPlayerHistory();
+    }
+
+    function updateLeaderboardSortIndicators(sortField, sortDirection) {
+      document.querySelectorAll('[data-sort-field]').forEach(header => {
+        const field = header.dataset.sortField;
+        const active = field === sortField;
+        const indicator = header.querySelector('[data-sort-indicator]');
+        const button = header.querySelector('button');
+
+        header.setAttribute('aria-sort', active
+          ? (sortDirection === 'asc' ? 'ascending' : 'descending')
+          : 'none');
+        indicator.textContent = active ? (sortDirection === 'asc' ? '↑' : '↓') : '↕';
+        button.setAttribute('aria-label', active
+          ? `Sorted by ${button.textContent.replace(/[↑↓↕]/g, '').trim()} ${sortDirection === 'asc' ? 'ascending' : 'descending'}`
+          : `Sort by ${button.textContent.replace(/[↑↓↕]/g, '').trim()}`);
+        button.classList.toggle('text-amber-200', active);
+      });
     }
 
     function renderPlayerHistory() {
@@ -2168,11 +2178,11 @@
 
       const searchInput = document.getElementById('leaderboardSearch');
       const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-      const sortField = document.getElementById('leaderboardSort')?.value || 'name';
-      const sortDirection = document.getElementById('leaderboardSortDirection')?.dataset.direction || 'asc';
+      updateLeaderboardSortIndicators(leaderboardSortField, leaderboardSortDirection);
       const getSortValue = player => {
-        if (sortField === 'gd') return (player.gf || 0) - (player.ga || 0);
-        return player[sortField] ?? 0;
+        if (leaderboardSortField === 'gd') return (player.gf || 0) - (player.ga || 0);
+        if (leaderboardSortField === 'winPct') return getPlayerWinPct(player);
+        return player[leaderboardSortField] ?? 0;
       };
       const filtered = players
         .filter(p => p.name.toLowerCase().includes(query) || p.position.toLowerCase().includes(query))
@@ -2184,11 +2194,11 @@
             : aValue - bValue;
           return comparison === 0
             ? a.name.localeCompare(b.name)
-            : comparison * (sortDirection === 'asc' ? 1 : -1);
+            : comparison * (leaderboardSortDirection === 'asc' ? 1 : -1);
         });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="13" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="14" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
         return;
       }
 
@@ -2204,6 +2214,9 @@
         const ga = p.ga || 0;
         const points = p.points || 0;
         const gd = gf - ga;
+        const winPct = getPlayerWinPct(p);
+        const winPctLabel = mp > 0 ? `${Math.round(winPct)}%` : '—';
+        const winPctColor = mp === 0 ? 'text-slate-600' : winPct >= 60 ? 'text-emerald-400' : winPct >= 40 ? 'text-amber-300' : 'text-red-400';
         const gdSign = gd > 0 ? `+${gd}` : `${gd}`;
         const gdColor = gd > 0 ? 'text-emerald-400' : gd < 0 ? 'text-red-400' : 'text-slate-400';
         const pointsColor = points > 0 ? 'text-amber-300' : points < 0 ? 'text-red-400' : 'text-slate-400';
@@ -2215,17 +2228,18 @@
             <span>${p.name}</span>
           </td>
           <td class="py-2.5 px-3 text-slate-400 font-mono text-[11px]">${p.position}</td>
-          <td class="py-2.5 px-3 text-center font-mono font-black ${pointsColor}">${points}</td>
-          <td class="py-2.5 px-3 text-center font-mono text-slate-200">${mp}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-black border-l border-slate-800/40 ${pointsColor}">${points}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-200 border-l border-slate-800/40">${mp}</td>
           <td class="py-2.5 px-3 text-center font-mono text-emerald-400 font-bold">${wins}</td>
-          <td class="py-2.5 px-3 text-center font-mono text-red-400 font-bold">${losses}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-300 font-bold">${draws}</td>
-          <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black">${goals}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-red-400 font-bold">${losses}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black border-l border-slate-800/40">${goals}</td>
           <td class="py-2.5 px-3 text-center font-mono text-sky-400 font-black">${assists}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-300 font-black">${ownGoals}</td>
-          <td class="py-2.5 px-3 text-center font-mono text-slate-300">${gf}</td>
+          <td class="py-2.5 px-3 text-center font-mono text-slate-300 border-l border-slate-800/40">${gf}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-400">${ga}</td>
           <td class="py-2.5 px-3 text-center font-mono font-bold ${gdColor}">${gdSign}</td>
+          <td class="py-2.5 px-3 text-center font-mono font-bold border-l border-slate-800/40 ${winPctColor}">${winPctLabel}</td>
         `;
         tbody.appendChild(tr);
       });
