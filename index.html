@@ -1887,6 +1887,11 @@
       }
     }
 
+    function getMatchTeamPlayers(team) {
+      const activePlayers = team === 'red' ? teamRed : teamYellow;
+      return [...activePlayers, ...bench.filter(p => p.benchTeam === team)];
+    }
+
     function populateGoalscorerDropdowns() {
       const redSelect = document.getElementById('selectRedGoalscorer');
       const yellowSelect = document.getElementById('selectYellowGoalscorer');
@@ -1894,34 +1899,36 @@
       const yellowOwnSelect = document.getElementById('selectYellowOwnGoalscorer');
       const redAssistSelect = document.getElementById('selectRedAssist');
       const yellowAssistSelect = document.getElementById('selectYellowAssist');
+      const redPlayers = getMatchTeamPlayers('red');
+      const yellowPlayers = getMatchTeamPlayers('yellow');
 
       redSelect.innerHTML = '<option value="">Select Red Player...</option>';
-      teamRed.forEach(p => {
+      redPlayers.forEach(p => {
         redSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
       yellowSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
-      teamYellow.forEach(p => {
+      yellowPlayers.forEach(p => {
         yellowSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
       redOwnSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
-      teamYellow.forEach(p => {
+      yellowPlayers.forEach(p => {
         redOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
       yellowOwnSelect.innerHTML = '<option value="">Select Red Player...</option>';
-      teamRed.forEach(p => {
+      redPlayers.forEach(p => {
         yellowOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
       redAssistSelect.innerHTML = '<option value="">Select Red Player...</option>';
-      teamRed.forEach(p => {
+      redPlayers.forEach(p => {
         redAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
 
       yellowAssistSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
-      teamYellow.forEach(p => {
+      yellowPlayers.forEach(p => {
         yellowAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
     }
@@ -2421,8 +2428,8 @@
         date: selectedMatchDate,
         scoreRed: scoreRed,
         scoreYellow: scoreYellow,
-        teamRed: sortPlayersByPosition(teamRed).map(p => p.name),
-        teamYellow: sortPlayersByPosition(teamYellow).map(p => p.name),
+        teamRed: sortPlayersByPosition(getMatchTeamPlayers('red')).map(p => p.name),
+        teamYellow: sortPlayersByPosition(getMatchTeamPlayers('yellow')).map(p => p.name),
         redGoals: [...redGoalscorers],
         yellowGoals: [...yellowGoalscorers],
         redOwnGoals: [...redOwnGoalscorers],
