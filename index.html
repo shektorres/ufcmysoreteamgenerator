@@ -250,7 +250,6 @@
               <h3 class="text-xs font-bold text-red-300 flex items-center gap-2">
                 <i data-lucide="ambulance" class="w-4 h-4"></i> Injury List
               </h3>
-              <p class="text-[11px] text-slate-400">Expected return is an estimate. An admin must mark the player fit before selection is allowed again.</p>
               <div id="injuryList" class="space-y-2 text-xs"></div>
             </div>
 
@@ -873,6 +872,18 @@
         </div>
 
         <div id="rosterTable" class="space-y-2"></div>
+        <datalist id="injuryTypeOptions">
+          <option value="Ankle sprain">
+          <option value="Hamstring strain">
+          <option value="Groin strain">
+          <option value="Calf strain">
+          <option value="Knee injury">
+          <option value="Back injury">
+          <option value="Shoulder injury">
+          <option value="Fracture">
+          <option value="Concussion">
+          <option value="Illness">
+        </datalist>
       </div>
 
       <div class="p-4 border-t border-slate-800 bg-slate-900/80 flex justify-between items-center">
@@ -1292,7 +1303,7 @@
     function normalizeRoster(roster) {
       return roster.map(p => ({
         baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseAssists: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0, basePoints: 0,
-        injured: false, injuryFrom: '', expectedReturn: '',
+        injured: false, injuryType: '', injuryFrom: '', expectedReturn: '',
         ...p,
         position: normalizePlayerPosition(p)
       }));
@@ -1326,7 +1337,12 @@
       const expected = player.expectedReturn ? formatInjuryDate(player.expectedReturn) : 'Unknown';
       const status = !isPlayerUnavailable(player) ? 'Upcoming absence'
         : player.expectedReturn && player.expectedReturn <= selectedMatchDate ? 'Awaiting fitness clearance' : 'Unavailable';
-      return `${status} · Out from: ${formatInjuryDate(player.injuryFrom)} · Expected return: ${expected}`;
+      const type = player.injuryType ? `${player.injuryType} · ` : '';
+      return `${type}${status} · Out from: ${formatInjuryDate(player.injuryFrom)} · Expected return: ${expected}`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
     }
 
     function renderInjuryList() {
@@ -1500,7 +1516,7 @@
             <div class="flex flex-wrap items-center gap-2">
               <span class="font-bold text-xs ${playing ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${posStyle}">${p.position}</span>
-              ${p.injured ? `<span class="inline-flex items-center gap-1 text-[10px] text-red-300"><i data-lucide="ambulance" class="w-3.5 h-3.5"></i>${unavailable ? 'Injured' : 'Upcoming absence'}</span>` : ''}
+              ${p.injured ? `<span class="inline-flex items-center gap-1 text-[10px] text-red-300"><i data-lucide="ambulance" class="w-3.5 h-3.5"></i>${p.injuryType ? escapeHtml(p.injuryType) : (unavailable ? 'Injured' : 'Upcoming absence')}</span>` : ''}
             </div>
           </div>
           <div>
@@ -2645,6 +2661,9 @@
               <i data-lucide="ambulance" class="w-4 h-4"></i> Injured
             </label>
             ${p.injured ? `
+              <label class="space-y-1 min-w-0">Injury type
+                <input type="text" list="injuryTypeOptions" maxlength="60" placeholder="e.g. Ankle sprain" aria-label="Injury type for ${escapeHtml(p.name)}" value="${escapeHtml(p.injuryType)}" onchange="updatePlayerInjury('${p.id}', 'injuryType', this.value)" class="block w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200">
+              </label>
               <label class="space-y-1 min-w-0">Unavailable from
                 <input type="date" aria-label="Unavailable from for ${p.name}" value="${isValidDate(p.injuryFrom) ? p.injuryFrom : ''}" onchange="updatePlayerInjury('${p.id}', 'injuryFrom', this.value)" class="block w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 [color-scheme:dark]">
               </label>
@@ -2676,9 +2695,11 @@
     async function updatePlayerInjury(id, prop, value) {
       if (!isAdmin) return;
       const player = players.find(p => p.id === id);
-      if (!player || !['injured', 'injuryFrom', 'expectedReturn'].includes(prop)) return;
+      if (!player || !['injured', 'injuryType', 'injuryFrom', 'expectedReturn'].includes(prop)) return;
+      if (prop === 'injuryType') value = String(value).trim().slice(0, 60);
       const next = {
         injured: Boolean(player.injured),
+        injuryType: player.injuryType || '',
         injuryFrom: player.injuryFrom || '',
         expectedReturn: player.expectedReturn || '',
         [prop]: value
@@ -2686,6 +2707,7 @@
       if (prop === 'injured') {
         next.injuryFrom = value ? getLocalDate() : '';
         next.expectedReturn = '';
+        next.injuryType = '';
       }
       if (next.injured && (!isValidDate(next.injuryFrom) ||
           (next.expectedReturn && (!isValidDate(next.expectedReturn) || next.expectedReturn < next.injuryFrom)))) {
@@ -2718,6 +2740,7 @@
         tier,
         selected: true,
         injured: false,
+        injuryType: '',
         injuryFrom: '',
         expectedReturn: '',
         baseMp: 0,
