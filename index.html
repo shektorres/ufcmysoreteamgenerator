@@ -246,6 +246,13 @@
             <div id="attendanceList" class="flex-1 overflow-y-auto max-h-[420px] min-h-[250px] pr-1 space-y-1.5">
               <!-- Rendered dynamically -->
             </div>
+            <div class="mt-3 pt-3 border-t border-slate-800 space-y-2">
+              <h3 class="text-xs font-bold text-red-300 flex items-center gap-2">
+                <i data-lucide="ambulance" class="w-4 h-4"></i> Injury List
+              </h3>
+              <p class="text-[11px] text-slate-400">Expected return is an estimate. An admin must mark the player fit before selection is allowed again.</p>
+              <div id="injuryList" class="space-y-2 text-xs"></div>
+            </div>
 
             <!-- Generate Teams Action Button -->
             <div class="pt-3.5 mt-2 border-t border-slate-800">
@@ -807,7 +814,7 @@
             <i data-lucide="shield-check" class="w-5 h-5 text-amber-400"></i>
             Administrator Squad Matrix & Roster Editor
           </h3>
-          <p class="text-xs text-slate-400">Edit player names, tiers, positions, availability & backup data</p>
+          <p class="text-xs text-slate-400">Edit players and injuries. Set unavailable-from and expected return dates; mark fit to clear an injury.</p>
         </div>
         <button onclick="closeRosterModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -1119,7 +1126,7 @@
     let yellowOwnGoalscorers = [];
     let redAssists = [];
     let yellowAssists = [];
-    let selectedMatchDate = new Date().toISOString().split('T')[0];
+    let selectedMatchDate = getLocalDate();
     let matchHistory = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -1179,8 +1186,16 @@
     }
 
     function syncMatchDate(val) {
+      if (!isValidDate(val)) {
+        alert('Please choose a valid match date.');
+        document.getElementById('matchDateControl').value = selectedMatchDate;
+        return;
+      }
       selectedMatchDate = val;
       updateMatchDateDisplay();
+      updateAttendanceBadge();
+      renderAttendanceList();
+      generateBalancedTeams();
     }
 
     function updateMatchDateDisplay() {
@@ -1277,9 +1292,63 @@
     function normalizeRoster(roster) {
       return roster.map(p => ({
         baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseAssists: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0, basePoints: 0,
+        injured: false, injuryFrom: '', expectedReturn: '',
         ...p,
         position: normalizePlayerPosition(p)
       }));
+    }
+
+    function getLocalDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function isValidDate(value) {
+      if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const date = new Date(`${value}T00:00:00Z`);
+      return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+    }
+
+    function formatInjuryDate(value) {
+      if (!isValidDate(value)) return 'Not set';
+      return new Date(`${value}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function isPlayerUnavailable(player) {
+      return Boolean(player.injured && (!isValidDate(player.injuryFrom) || player.injuryFrom <= selectedMatchDate));
+    }
+
+    function isPlayerPlaying(player) {
+      return player.selected && !isPlayerUnavailable(player);
+    }
+
+    function getInjurySummary(player) {
+      const expected = player.expectedReturn ? formatInjuryDate(player.expectedReturn) : 'Unknown';
+      const status = !isPlayerUnavailable(player) ? 'Upcoming absence'
+        : player.expectedReturn && player.expectedReturn <= selectedMatchDate ? 'Awaiting fitness clearance' : 'Unavailable';
+      return `${status} · Out from: ${formatInjuryDate(player.injuryFrom)} · Expected return: ${expected}`;
+    }
+
+    function renderInjuryList() {
+      const container = document.getElementById('injuryList');
+      container.replaceChildren();
+      const injured = players.filter(p => p.injured);
+      if (injured.length === 0) {
+        container.textContent = 'No players currently on the injury list.';
+        return;
+      }
+      injured.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'rounded-lg border border-red-900/40 bg-red-950/20 p-2 space-y-1';
+        const name = document.createElement('div');
+        name.className = 'font-bold text-red-300';
+        name.textContent = p.name;
+        const summary = document.createElement('div');
+        summary.className = 'text-[11px] text-slate-400';
+        summary.textContent = getInjurySummary(p);
+        item.append(name, summary);
+        container.appendChild(item);
+      });
     }
 
     async function loadSharedState() {
@@ -1372,12 +1441,13 @@
     }
 
     function updateAttendanceBadge() {
-      const sel = players.filter(p => p.selected).length;
+      const sel = players.filter(isPlayerPlaying).length;
       document.getElementById('attendanceBadge').textContent = `${sel} / ${players.length} Playing`;
       document.getElementById('rosterCount').textContent = players.length;
     }
 
     function renderAttendanceList() {
+      renderInjuryList();
       const container = document.getElementById('attendanceList');
       const query = document.getElementById('attendanceSearch').value.toLowerCase().trim();
       const posFilter = document.getElementById('attendancePosFilter').value;
@@ -1398,9 +1468,11 @@
       }
 
       filtered.forEach(p => {
+        const unavailable = isPlayerUnavailable(p);
+        const playing = isPlayerPlaying(p);
         const item = document.createElement('div');
         item.className = `p-2.5 rounded-xl flex items-center justify-between cursor-pointer transition ${
-          p.selected 
+          playing
             ? 'bg-slate-900/90 border border-amber-900/50 hover:border-amber-500/50' 
             : 'bg-slate-950/40 border border-transparent text-slate-500 hover:bg-slate-900/40'
         }`;
@@ -1424,10 +1496,11 @@
 
         item.innerHTML = `
           <div class="flex items-center space-x-3">
-            <input type="checkbox" ${p.selected ? 'checked' : ''} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer">
-            <div class="flex items-center gap-2">
-              <span class="font-bold text-xs ${p.selected ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
+            <input type="checkbox" aria-label="Select ${p.name}" ${playing ? 'checked' : ''} ${unavailable ? 'disabled' : ''} onchange="toggleAttendance('${p.id}')" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-amber-500 focus:ring-amber-500 cursor-pointer disabled:cursor-not-allowed">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="font-bold text-xs ${playing ? 'text-slate-100' : 'text-slate-500'}">${p.name}</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-extrabold border ${posStyle}">${p.position}</span>
+              ${p.injured ? `<span class="inline-flex items-center gap-1 text-[10px] text-red-300"><i data-lucide="ambulance" class="w-3.5 h-3.5"></i>${unavailable ? 'Injured' : 'Upcoming absence'}</span>` : ''}
             </div>
           </div>
           <div>
@@ -1442,7 +1515,7 @@
 
     function toggleAttendance(id) {
       const p = players.find(x => x.id === id);
-      if (p) {
+      if (p && !isPlayerUnavailable(p)) {
         p.selected = !p.selected;
         updateAttendanceBadge();
         renderAttendanceList();
@@ -1452,13 +1525,14 @@
 
     function quickSelect(count) {
       players.forEach(p => p.selected = false);
-      const gks = players.filter(p => p.position === 'GK').slice(0, 2);
+      const available = players.filter(p => !isPlayerUnavailable(p));
+      const gks = available.filter(p => p.position === 'GK').slice(0, 2);
       gks.forEach(p => p.selected = true);
 
       let needed = count - gks.length;
-      const defs = players.filter(p => isDefenderPosition(p.position));
-      const mids = players.filter(p => p.position === 'MID');
-      const atts = players.filter(p => isAttackerPosition(p.position));
+      const defs = available.filter(p => isDefenderPosition(p.position));
+      const mids = available.filter(p => p.position === 'MID');
+      const atts = available.filter(p => isAttackerPosition(p.position));
 
       const priority = [...defs.slice(0, 5), ...mids.slice(0, 3), ...atts.slice(0, 4)];
       for (let i = 0; i < priority.length && needed > 0; i++) {
@@ -1467,7 +1541,7 @@
       }
 
       if (needed > 0) {
-        players.filter(p => !p.selected).slice(0, needed).forEach(p => p.selected = true);
+        available.filter(p => !p.selected).slice(0, needed).forEach(p => p.selected = true);
       }
 
       updateAttendanceBadge();
@@ -1476,7 +1550,7 @@
     }
 
     function selectAll() {
-      players.forEach(p => p.selected = true);
+      players.forEach(p => p.selected = !isPlayerUnavailable(p));
       updateAttendanceBadge();
       renderAttendanceList();
       generateBalancedTeams();
@@ -1491,7 +1565,7 @@
 
     function generateBalancedTeams() {
       recalculatePlayerStats();
-      const selected = players.filter(p => p.selected);
+      const selected = players.filter(isPlayerPlaying);
 
       if (selected.length < 2) {
         teamRed = [...selected];
@@ -2541,7 +2615,7 @@
 
       players.forEach(p => {
         const item = document.createElement('div');
-        item.className = "p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 text-xs";
+        item.className = "p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs";
 
         item.innerHTML = `
           <div class="flex items-center space-x-2 flex-1 min-w-[150px]">
@@ -2565,6 +2639,22 @@
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
+          <div class="w-full border-t border-slate-800 pt-2 flex flex-wrap items-end gap-3">
+            <label class="flex items-center gap-1.5 py-1 text-red-300 font-semibold">
+              <input type="checkbox" ${p.injured ? 'checked' : ''} onchange="updatePlayerInjury('${p.id}', 'injured', this.checked)">
+              <i data-lucide="ambulance" class="w-4 h-4"></i> Injured
+            </label>
+            ${p.injured ? `
+              <label class="space-y-1 min-w-0">Unavailable from
+                <input type="date" aria-label="Unavailable from for ${p.name}" value="${isValidDate(p.injuryFrom) ? p.injuryFrom : ''}" onchange="updatePlayerInjury('${p.id}', 'injuryFrom', this.value)" class="block w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 [color-scheme:dark]">
+              </label>
+              <label class="space-y-1 min-w-0">Expected return (optional)
+                <input type="date" aria-label="Expected return for ${p.name}" min="${isValidDate(p.injuryFrom) ? p.injuryFrom : ''}" value="${isValidDate(p.expectedReturn) ? p.expectedReturn : ''}" onchange="updatePlayerInjury('${p.id}', 'expectedReturn', this.value)" class="block w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 [color-scheme:dark]">
+              </label>
+              <button onclick="updatePlayerInjury('${p.id}', 'injured', false)" class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">Mark fit</button>
+              <p class="w-full text-[11px] text-slate-400">Return date is an estimate only. Mark fit to allow selection again.</p>
+            ` : ''}
+          </div>
         `;
         container.appendChild(item);
       });
@@ -2583,6 +2673,35 @@
       }
     }
 
+    async function updatePlayerInjury(id, prop, value) {
+      if (!isAdmin) return;
+      const player = players.find(p => p.id === id);
+      if (!player || !['injured', 'injuryFrom', 'expectedReturn'].includes(prop)) return;
+      const next = {
+        injured: Boolean(player.injured),
+        injuryFrom: player.injuryFrom || '',
+        expectedReturn: player.expectedReturn || '',
+        [prop]: value
+      };
+      if (prop === 'injured') {
+        next.injuryFrom = value ? getLocalDate() : '';
+        next.expectedReturn = '';
+      }
+      if (next.injured && (!isValidDate(next.injuryFrom) ||
+          (next.expectedReturn && (!isValidDate(next.expectedReturn) || next.expectedReturn < next.injuryFrom)))) {
+        alert('Choose a valid unavailable-from date and an expected return on or after that date, or leave the return unknown.');
+        renderRosterTable();
+        return;
+      }
+      Object.assign(player, next);
+      if (isPlayerUnavailable(player)) player.selected = false;
+      updateAttendanceBadge();
+      renderRosterTable();
+      renderAttendanceList();
+      generateBalancedTeams();
+      await saveRoster();
+    }
+
     function handleAddPlayer(e) {
       e.preventDefault();
       if (!isAdmin) return;
@@ -2598,6 +2717,9 @@
         position,
         tier,
         selected: true,
+        injured: false,
+        injuryFrom: '',
+        expectedReturn: '',
         baseMp: 0,
         baseWins: 0,
         baseLosses: 0,
