@@ -3,7 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#030706">
   <title>UFC MYSORE MATCHDAY - Team Generator & Match History</title>
+
+  <!-- Apply saved (or system) theme before first paint to avoid a flash -->
+  <script>
+    (function () {
+      var saved = null;
+      try { saved = localStorage.getItem('ufc-theme'); } catch (e) {}
+      var isDark = saved ? saved === 'dark'
+        : !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+      document.documentElement.classList.toggle('dark', isDark);
+    })();
+  </script>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -137,6 +149,111 @@
     .admin-only {
       display: none !important;
     }
+
+    /* ───────────── Theme toggle ─────────────
+       The site is authored with dark Tailwind utilities. The rules below
+       re-map those utilities when the <html> element does NOT have the
+       "dark" class, so the light theme needs no markup changes and also
+       covers content rendered later by JavaScript. */
+
+    .theme-icon-light { display: none; }
+    html:not(.dark) .theme-icon-light { display: block; }
+    html:not(.dark) .theme-icon-dark { display: none; }
+
+    html.dark { color-scheme: dark; }
+    html:not(.dark) { color-scheme: light; }
+
+    html:not(.dark) body {
+      background-color: #f4f7f5;
+      color: #0f172a;
+    }
+    html:not(.dark) ::-webkit-scrollbar-track { background: #e6ede9; }
+    html:not(.dark) ::-webkit-scrollbar-thumb { background: #b7cbbf; }
+    html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+
+    html:not(.dark) .glass-panel {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    html:not(.dark) .glass-card {
+      background: rgba(15, 23, 42, 0.03);
+      border-color: rgba(15, 23, 42, 0.08);
+    }
+    html:not(.dark) .badge-t1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; border-color: #f59e0b; }
+    html:not(.dark) .badge-t2 { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; border-color: #818cf8; }
+    html:not(.dark) .badge-t3 { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #334155; border-color: #94a3b8; }
+
+    /* Surfaces: backgrounds */
+    html:not(.dark) .bg-\[\#030706\],
+    html:not(.dark) .bg-\[\#030706\]\/90 { background-color: #f4f7f5; }
+    html:not(.dark) .bg-\[\#030706\]\/90 { background-color: rgba(244, 247, 245, 0.92); }
+    html:not(.dark) .bg-slate-950 { background-color: #ffffff; }
+    html:not(.dark) .bg-slate-900 { background-color: #f1f6f3; }
+    html:not(.dark) .bg-slate-800 { background-color: #e3ebe6; }
+    html:not(.dark) .bg-slate-700 { background-color: #cbd5d0; }
+    html:not(.dark) .bg-slate-950\/40 { background-color: rgba(255, 255, 255, 0.4); }
+    html:not(.dark) .bg-slate-950\/50 { background-color: rgba(255, 255, 255, 0.5); }
+    html:not(.dark) .bg-slate-950\/60 { background-color: rgba(255, 255, 255, 0.6); }
+    html:not(.dark) .bg-slate-950\/70 { background-color: rgba(255, 255, 255, 0.7); }
+    html:not(.dark) .bg-slate-950\/80 { background-color: rgba(255, 255, 255, 0.8); }
+    html:not(.dark) .bg-slate-950\/85 { background-color: rgba(255, 255, 255, 0.85); }
+    html:not(.dark) .bg-slate-950\/90 { background-color: rgba(255, 255, 255, 0.9); }
+    html:not(.dark) .bg-slate-900\/40 { background-color: rgba(241, 246, 243, 0.4); }
+    html:not(.dark) .bg-slate-900\/50 { background-color: rgba(241, 246, 243, 0.5); }
+    html:not(.dark) .bg-slate-900\/70 { background-color: rgba(241, 246, 243, 0.7); }
+    html:not(.dark) .bg-slate-900\/80 { background-color: rgba(241, 246, 243, 0.8); }
+    html:not(.dark) .bg-slate-900\/90 { background-color: rgba(241, 246, 243, 0.9); }
+    html:not(.dark) .bg-red-950\/20 { background-color: rgba(254, 226, 226, 0.4); }
+    html:not(.dark) .bg-red-950\/60 { background-color: rgba(254, 226, 226, 0.8); }
+    html:not(.dark) .bg-red-950\/80 { background-color: rgba(254, 226, 226, 0.9); }
+    html:not(.dark) .bg-amber-950\/60 { background-color: rgba(254, 243, 199, 0.8); }
+    html:not(.dark) .bg-amber-950\/80 { background-color: rgba(254, 243, 199, 0.9); }
+    html:not(.dark) .hover\:bg-slate-800:hover { background-color: #e3ebe6; }
+    html:not(.dark) .hover\:bg-slate-900:hover { background-color: #f1f6f3; }
+    html:not(.dark) .via-slate-950 { --tw-gradient-stops: var(--tw-gradient-from), #ffffff, var(--tw-gradient-to, rgba(255, 255, 255, 0)); }
+    html:not(.dark) .to-slate-950 { --tw-gradient-to: #ffffff; }
+
+    /* Borders */
+    html:not(.dark) .border-slate-800,
+    html:not(.dark) .divide-slate-800\/60 > :not([hidden]) ~ :not([hidden]) { border-color: #d3ddd7; }
+    html:not(.dark) .border-slate-700 { border-color: #c3d0c9; }
+    html:not(.dark) .border-slate-800\/40 { border-color: rgba(211, 221, 215, 0.4); }
+    html:not(.dark) .border-slate-800\/60 { border-color: rgba(211, 221, 215, 0.6); }
+    html:not(.dark) .border-slate-800\/70 { border-color: rgba(211, 221, 215, 0.7); }
+    html:not(.dark) .border-slate-800\/80 { border-color: rgba(211, 221, 215, 0.8); }
+    html:not(.dark) .border-emerald-950\/80,
+    html:not(.dark) .border-emerald-950\/60,
+    html:not(.dark) .border-emerald-900\/60 { border-color: #cfe0d6; }
+
+    /* Text: neutrals (slate scale) */
+    html:not(.dark) .text-slate-100 { color: #0f172a; }
+    html:not(.dark) .text-slate-200 { color: #1e293b; }
+    html:not(.dark) .text-slate-300 { color: #334155; }
+    html:not(.dark) .text-slate-400 { color: #475569; }
+    html:not(.dark) .text-slate-500 { color: #64748b; }
+    html:not(.dark) .text-slate-600 { color: #94a3b8; }
+    html:not(.dark) .text-slate-700 { color: #cbd5e1; }
+    html:not(.dark) .hover\:text-slate-200:hover { color: #1e293b; }
+    /* Headings / strong text. White text is kept where it sits on a
+       saturated colour (red/amber buttons and pitch tokens). */
+    html:not(.dark) .text-white:not([class*="bg-red"]):not([class*="bg-amber"]) { color: #0f172a; }
+    html:not(.dark) .hover\:text-white:hover:not([class*="bg-red"]):not([class*="bg-amber"]) { color: #0f172a; }
+
+    /* Text: accent colours (darker shades for contrast on white) */
+    html:not(.dark) .text-amber-200 { color: #92400e; }
+    html:not(.dark) .text-amber-300,
+    html:not(.dark) .text-amber-400,
+    html:not(.dark) .text-amber-500 { color: #b45309; }
+    html:not(.dark) .text-emerald-200 { color: #065f46; }
+    html:not(.dark) .text-emerald-300 { color: #047857; }
+    html:not(.dark) .text-emerald-400 { color: #059669; }
+    html:not(.dark) .text-red-200 { color: #991b1b; }
+    html:not(.dark) .text-red-300 { color: #b91c1c; }
+    html:not(.dark) .text-red-400,
+    html:not(.dark) .text-red-500 { color: #dc2626; }
+    html:not(.dark) .text-blue-300 { color: #1d4ed8; }
+    html:not(.dark) .text-cyan-300 { color: #0e7490; }
+    html:not(.dark) .text-fuchsia-300 { color: #a21caf; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased bg-[#030706] text-slate-100 selection:bg-amber-500 selection:text-black">
@@ -172,6 +289,12 @@
             <span class="sm:hidden">Matches</span>
           </button>
         </div>
+
+        <!-- Theme Toggle (dark / light) -->
+        <button id="themeToggle" type="button" onclick="toggleTheme()" aria-label="Switch to light mode" title="Switch to light mode" class="p-1.5 sm:p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-amber-300 transition flex items-center justify-center shrink-0">
+          <i data-lucide="moon" class="theme-icon-dark w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+          <i data-lucide="sun" class="theme-icon-light w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
+        </button>
 
         <!-- Admin Auth Button -->
         <button id="adminAuthBtn" onclick="handleAdminAuthClick()" class="px-2 sm:px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/40 transition flex items-center gap-1 sm:gap-1.5 shadow-sm">
@@ -472,6 +595,8 @@
             <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
             <span class="text-xs font-bold text-slate-400">Match Date:</span>
             <input type="date" id="matchDateControl" onchange="syncMatchDate(this.value)" class="admin-only bg-transparent text-amber-300 font-mono text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark]">
+            <span class="text-xs font-bold text-slate-400">Time:</span>
+            <input type="time" id="matchTimeControl" onchange="syncMatchTime(this.value)" class="admin-only bg-transparent text-amber-300 font-mono text-xs font-bold focus:outline-none cursor-pointer [color-scheme:dark]">
             <span id="matchDateDisplay" class="text-amber-300 font-mono text-xs font-bold"></span>
           </div>
         </div>
@@ -512,21 +637,6 @@
               <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Goalscorers (Red)</p>
               <div id="redGoalscorersList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
                 <!-- Logged Red Goalscorers -->
-              </div>
-              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
-                <label class="text-[11px] font-bold text-slate-400 block">Log Assist (Red)</label>
-                <div class="flex gap-2">
-                  <select id="selectRedAssist" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-red-500">
-                    <option value="">Select Red Player...</option>
-                  </select>
-                  <button onclick="addAssist('red')" class="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/40 rounded-xl text-xs font-bold">
-                    Add
-                  </button>
-                </div>
-              </div>
-              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Assists (Red)</p>
-              <div id="redAssistsList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
-                <!-- Logged Red Assists -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
                 <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Yellow Player)</label>
@@ -588,21 +698,6 @@
                 <!-- Logged Yellow Goalscorers -->
               </div>
               <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
-                <label class="text-[11px] font-bold text-slate-400 block">Log Assist (Yellow)</label>
-                <div class="flex gap-2">
-                  <select id="selectYellowAssist" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                    <option value="">Select Yellow Player...</option>
-                  </select>
-                  <button onclick="addAssist('yellow')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/40 rounded-xl text-xs font-bold">
-                    Add
-                  </button>
-                </div>
-              </div>
-              <p class="text-[11px] font-bold text-slate-400 block sm:hidden">Assists (Yellow)</p>
-              <div id="yellowAssistsList" class="flex flex-wrap gap-1.5 justify-center pt-1 min-h-[30px]">
-                <!-- Logged Yellow Assists -->
-              </div>
-              <div class="admin-only space-y-2 pt-2 border-t border-slate-800/70">
                 <label class="text-[11px] font-bold text-slate-400 block">Log Own Goal (Red Player)</label>
                 <div class="flex gap-2">
                   <select id="selectYellowOwnGoalscorer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
@@ -637,6 +732,39 @@
           <span>View Statistics</span>
         </button>
       </div>
+
+      <!-- PLAYER OF THE MONTH (clickable, below the Player Records banner) -->
+      <details class="group glass-panel rounded-2xl shadow-xl border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-slate-950 to-slate-950">
+        <summary class="cursor-pointer list-none px-4 py-4 sm:px-5 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 shrink-0">
+              <i data-lucide="trophy" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-black text-white">Player of the Month</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Best performer each month, ranked against their own position. Click to view.</p>
+            </div>
+          </div>
+          <span class="text-amber-300 text-lg font-black transition group-open:rotate-180">▾</span>
+        </summary>
+        <div class="px-4 pb-4 sm:px-5 sm:pb-5 space-y-3 border-t border-slate-800/70 pt-3">
+          <details class="rounded-xl border border-amber-500/25 bg-slate-950/40">
+            <summary class="cursor-pointer px-3 py-2 text-[11px] font-black uppercase tracking-wider text-amber-300">
+              How the monthly winner is calculated
+            </summary>
+            <ol class="px-6 pb-3 pt-1 text-[11px] text-slate-300 list-decimal space-y-1.5">
+              <li>Each match is scored with the position-based points table in Player Records.</li>
+              <li>For each player in a month: <strong>points per match</strong> = total points ÷ matches played that month.</li>
+              <li>Each position has an <strong>average</strong>: points per match for everyone in that scoring group (GK, CB, FB, MID, ATT) across all matches up to the end of that month.</li>
+              <li>Each player's <strong>position score</strong> = (their points per match that month − their position average) ÷ the spread of those differences across all qualifying players that month. Positive means above their position; negative means below.</li>
+              <li>Only players with at least <strong>2 matches</strong> in the month qualify. Ties go to higher points per match, then more matches, then name.</li>
+            </ol>
+          </details>
+          <div id="monthlyBestContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- Rendered Dynamically -->
+          </div>
+        </div>
+      </details>
 
       <!-- MATCH HISTORY LOG ARCHIVE -->
       <div class="glass-panel rounded-2xl p-4 sm:p-6 shadow-2xl border border-slate-800 space-y-4">
@@ -718,7 +846,6 @@
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Clean sheet (0 conceded)</td><td class="text-center text-emerald-400">+1</td><td class="text-center text-emerald-400">+1</td><td class="text-center text-emerald-400">+5</td><td class="text-center text-emerald-400">+6</td><td class="text-center text-emerald-400">+8</td></tr>
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Conceded 1–3</td><td class="text-center text-slate-500">0</td><td class="text-center text-slate-500">0</td><td class="text-center text-emerald-400">+4</td><td class="text-center text-emerald-400">+5</td><td class="text-center text-emerald-400">+6</td></tr>
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Conceded 6+</td><td class="text-center text-red-400">-1</td><td class="text-center text-red-400">-1</td><td class="text-center text-red-400">-2</td><td class="text-center text-red-400">-2</td><td class="text-center text-red-400">-2</td></tr>
-                <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Assist</td><td colspan="5" class="text-center text-emerald-400">+3</td></tr>
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Hat-trick (3 goals)</td><td colspan="5" class="text-center text-emerald-400">+3 <span class="font-sans text-slate-500">(then +1 per goal beyond the 3rd)</span></td></tr>
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Own goal</td><td colspan="5" class="text-center text-red-400">-2</td></tr>
                 <tr><td class="py-1.5 pr-3 font-sans font-bold text-slate-200">Win</td><td colspan="5" class="text-center text-emerald-400">+3</td></tr>
@@ -735,7 +862,7 @@
                 <th colspan="2" class="pt-2.5 pb-1 px-3 font-black">Player</th>
                 <th colspan="1" class="pt-2.5 pb-1 px-3 text-center font-black text-amber-500/70 border-l border-slate-800">Score</th>
                 <th colspan="4" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Record</th>
-                <th colspan="3" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Attacking</th>
+                <th colspan="2" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Attacking</th>
                 <th colspan="3" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Team Goals</th>
                 <th colspan="1" class="pt-2.5 pb-1 px-3 text-center font-black border-l border-slate-800">Rate</th>
               </tr>
@@ -748,7 +875,6 @@
                 <th data-sort-field="draws" class="pb-3 pt-1 px-3 text-center text-slate-300"><button type="button" onclick="sortLeaderboardBy('draws')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Draws (D) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                 <th data-sort-field="losses" class="pb-3 pt-1 px-3 text-center text-red-400"><button type="button" onclick="sortLeaderboardBy('losses')" class="inline-flex items-center gap-1 hover:text-red-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Losses (L) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                 <th data-sort-field="goals" class="pb-3 pt-1 px-3 text-center text-amber-400 border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('goals')" class="inline-flex items-center gap-1 hover:text-amber-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Goals <span data-sort-indicator aria-hidden="true">↕</span></button></th>
-                <th data-sort-field="assists" class="pb-3 pt-1 px-3 text-center text-sky-400"><button type="button" onclick="sortLeaderboardBy('assists')" class="inline-flex items-center gap-1 hover:text-sky-300 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Assists (A) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                 <th data-sort-field="ownGoals" class="pb-3 pt-1 px-3 text-center text-red-300"><button type="button" onclick="sortLeaderboardBy('ownGoals')" class="inline-flex items-center gap-1 hover:text-red-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Own Goals <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                 <th data-sort-field="gf" class="pb-3 pt-1 px-3 text-center border-l border-slate-800"><button type="button" onclick="sortLeaderboardBy('gf')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Scored (GF) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
                 <th data-sort-field="ga" class="pb-3 pt-1 px-3 text-center"><button type="button" onclick="sortLeaderboardBy('ga')" class="inline-flex items-center gap-1 hover:text-slate-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 rounded">Conceded (GA) <span data-sort-indicator aria-hidden="true">↕</span></button></th>
@@ -1080,7 +1206,6 @@
     const POINTS_CLEAN_SHEET = { ATT: 1, MID: 1, FB: 5, CB: 6, GK: 8 };
     const POINTS_CONCEDED_LOW = { ATT: 0, MID: 0, FB: 4, CB: 5, GK: 6 };
     const POINTS_CONCEDED_HIGH = { ATT: -1, MID: -1, FB: -2, CB: -2, GK: -2 };
-    const POINTS_PER_ASSIST = 3;
     const POINTS_PER_OWN_GOAL = -2;
     const POINTS_HATTRICK = 3;
     const POINTS_HATTRICK_EXTRA_GOAL = 1;
@@ -1107,10 +1232,9 @@
       return 0;
     }
 
-    function calculateMatchPoints({ position, goals = 0, assists = 0, ownGoals = 0, conceded = 0, result = 'loss' }) {
+    function calculateMatchPoints({ position, goals = 0, ownGoals = 0, conceded = 0, result = 'loss' }) {
       const group = getPointsPositionGroup(position);
       let total = calculateGoalPoints(group, goals);
-      total += assists * POINTS_PER_ASSIST;
       total += ownGoals * POINTS_PER_OWN_GOAL;
       total += calculateConcededPoints(group, conceded);
       if (result === 'win') total += POINTS_WIN;
@@ -1135,13 +1259,13 @@
     let yellowGoalscorers = [];
     let redOwnGoalscorers = [];
     let yellowOwnGoalscorers = [];
-    let redAssists = [];
-    let yellowAssists = [];
     let selectedMatchDate = getLocalDate();
+    let selectedMatchTime = getLocalTime();
     let matchHistory = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('matchDateControl').value = selectedMatchDate;
+      document.getElementById('matchTimeControl').value = selectedMatchTime;
       updateMatchDateDisplay();
 
       const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
@@ -1151,6 +1275,7 @@
       isAdmin = Boolean(session);
 
       await loadSharedState();
+      pickRandomSquad();
       renderAttendanceList();
       generateBalancedTeams();
       updateAdminUIState();
@@ -1177,6 +1302,27 @@
     function closeRosterModal() {
       document.getElementById('rosterModal').classList.add('hidden');
     }
+
+    function syncThemeUi() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const btn = document.getElementById('themeToggle');
+      const label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
+      if (btn) {
+        btn.title = label;
+        btn.setAttribute('aria-label', label);
+      }
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', isDark ? '#030706' : '#f4f7f5');
+    }
+
+    function toggleTheme() {
+      const isDark = !document.documentElement.classList.contains('dark');
+      document.documentElement.classList.toggle('dark', isDark);
+      try { localStorage.setItem('ufc-theme', isDark ? 'dark' : 'light'); } catch (e) {}
+      syncThemeUi();
+    }
+
+    syncThemeUi();
 
     function switchMainSection(sec) {
       document.getElementById('sectionGenerator').classList.add('hidden');
@@ -1209,12 +1355,23 @@
       generateBalancedTeams();
     }
 
+    function syncMatchTime(val) {
+      if (!isValidTime(val)) {
+        alert('Please choose a valid match time.');
+        document.getElementById('matchTimeControl').value = selectedMatchTime;
+        return;
+      }
+      selectedMatchTime = val;
+      updateMatchDateDisplay();
+    }
+
     function updateMatchDateDisplay() {
       if (!selectedMatchDate) return;
       const parts = selectedMatchDate.split('-');
       const d = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date();
       const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      document.getElementById('matchDateDisplay').textContent = dateStr;
+      const timeStr = formatMatchTime(selectedMatchTime);
+      document.getElementById('matchDateDisplay').textContent = timeStr ? `${dateStr}, ${timeStr}` : dateStr;
     }
 
     /* ADMIN AUTHENTICATION CONTROLS */
@@ -1302,7 +1459,7 @@
 
     function normalizeRoster(roster) {
       return roster.map(p => ({
-        baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseAssists: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0, basePoints: 0,
+        baseMp: 0, baseWins: 0, baseLosses: 0, baseDraws: 0, baseGoals: 0, baseOwnGoals: 0, baseGf: 0, baseGa: 0, basePoints: 0,
         injured: false, injuryType: '', injuryFrom: '', expectedReturn: '',
         ...p,
         position: normalizePlayerPosition(p)
@@ -1312,6 +1469,22 @@
     function getLocalDate() {
       const now = new Date();
       return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function getLocalTime() {
+      const now = new Date();
+      return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function isValidTime(value) {
+      return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+    }
+
+    function formatMatchTime(value) {
+      if (!isValidTime(value)) return '';
+      const [h, m] = value.split(':').map(Number);
+      const d = new Date(2000, 0, 1, h, m);
+      return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
     }
 
     function isValidDate(value) {
@@ -1435,9 +1608,14 @@
           },
           payload => {
             const state = payload.new;
+            // Keep this page's matchday selection; the saved flags are only the roster's default.
+            const currentSelection = new Map(players.map(p => [p.id, p.selected]));
             players = Array.isArray(state.roster) && state.roster.length > 0
               ? normalizeRoster(state.roster)
               : JSON.parse(JSON.stringify(DEFAULT_ROSTER));
+            players.forEach(p => {
+              if (currentSelection.has(p.id)) p.selected = currentSelection.get(p.id);
+            });
             matchHistory = Array.isArray(state.match_history) ? state.match_history : [];
             updateAttendanceBadge();
             renderAttendanceList();
@@ -1539,6 +1717,31 @@
       }
     }
 
+    /* On open, pick a random matchday squad (in the page only; not saved to Supabase). */
+    const MATCHDAY_SQUAD_SIZE = 14;
+    const MATCHDAY_GOALKEEPERS = 2;
+
+    function shuffleList(list) {
+      const a = [...list];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function pickRandomSquad(size = MATCHDAY_SQUAD_SIZE) {
+      const available = players.filter(p => !isPlayerUnavailable(p));
+      players.forEach(p => p.selected = false);
+
+      const gks = shuffleList(available.filter(p => p.position === 'GK')).slice(0, MATCHDAY_GOALKEEPERS);
+      gks.forEach(p => p.selected = true);
+
+      const outfield = shuffleList(available.filter(p => p.position !== 'GK'));
+      outfield.slice(0, Math.max(0, size - gks.length)).forEach(p => p.selected = true);
+      updateAttendanceBadge();
+    }
+
     function quickSelect(count) {
       players.forEach(p => p.selected = false);
       const available = players.filter(p => !isPlayerUnavailable(p));
@@ -1601,59 +1804,75 @@
         benchPool = outfield.slice(14 - gks.length);
       }
 
-      const N = activePool.length;
-      const sizeA = Math.floor(N / 2);
-
-      let bestSplit = null;
-      let minCost = Infinity;
-
-      for (let i = 0; i < 12000; i++) {
-        const shuffled = [...activePool].sort(() => Math.random() - 0.5);
-        const candidateA = shuffled.slice(0, sizeA);
-        const idsA = new Set(candidateA.map(p => p.id));
-        const candidateB = activePool.filter(p => !idsA.has(p.id));
-
-        const gkA = candidateA.filter(p => p.position === 'GK').length;
-        const gkB = candidateB.filter(p => p.position === 'GK').length;
-        let gkPenalty = (gkA + gkB >= 2) ? Math.abs(gkA - gkB) * 10000 : 0;
-
-        const skillA = candidateA.reduce((s, p) => s + getPlayerTeamStrength(p), 0);
-        const skillB = candidateB.reduce((s, p) => s + getPlayerTeamStrength(p), 0);
-        const skillDiff = Math.abs(skillA - skillB);
-
-        const cbA = candidateA.filter(p => p.position === 'CB').length;
-        const cbB = candidateB.filter(p => p.position === 'CB').length;
-        const fbA = candidateA.filter(p => p.position === 'FB').length;
-        const fbB = candidateB.filter(p => p.position === 'FB').length;
-        const midA = candidateA.filter(p => p.position === 'MID').length;
-        const midB = candidateB.filter(p => p.position === 'MID').length;
-        const wngA = candidateA.filter(p => p.position === 'WNG').length;
-        const wngB = candidateB.filter(p => p.position === 'WNG').length;
-        const stA = candidateA.filter(p => p.position === 'ST').length;
-        const stB = candidateB.filter(p => p.position === 'ST').length;
-
-        const posDiff = Math.abs(cbA - cbB) + Math.abs(fbA - fbB) + Math.abs(midA - midB) + Math.abs(wngA - wngB) + Math.abs(stA - stB);
-
-        const t1A = candidateA.filter(p => p.tier === 1).length;
-        const t1B = candidateB.filter(p => p.tier === 1).length;
-        const t1Diff = Math.abs(t1A - t1B);
-
-        const totalCost = gkPenalty + (skillDiff * 100) + (posDiff * 45) + (t1Diff * 35) + Math.random();
-
-        if (totalCost < minCost) {
-          minCost = totalCost;
-          bestSplit = { teamA: candidateA, teamB: candidateB };
-        }
-      }
-
-      if (bestSplit) {
-        teamRed = bestSplit.teamA;
-        teamYellow = bestSplit.teamB;
-        bench = assignBenchTeams(benchPool);
-      }
+      const bestSplit = findBalancedSplit(activePool);
+      teamRed = bestSplit.teamA;
+      teamYellow = bestSplit.teamB;
+      bench = assignBenchTeams(benchPool);
 
       renderAllViews();
       populateGoalscorerDropdowns();
+    }
+
+    function getPositionLine(position) {
+      if (position === 'GK') return 'GK';
+      if (isDefenderPosition(position)) return 'DEF';
+      if (isAttackerPosition(position)) return 'ATT';
+      return 'MID';
+    }
+
+    // Exhaustively scores every split (pool is capped at 14, so at most 3,432 splits).
+    // Priority: goalkeepers > DEF/MID/ATT line counts > skill & exact positions > tier-1 spread.
+    function findBalancedSplit(pool) {
+      const n = pool.length;
+      const sizeA = Math.floor(n / 2);
+      const strength = pool.map(getPlayerTeamStrength);
+      const totalStrength = strength.reduce((s, v) => s + v, 0);
+      const countBy = key => pool.reduce((acc, p) => (acc[key(p)] = (acc[key(p)] || 0) + 1, acc), {});
+      const lineTotals = countBy(p => getPositionLine(p.position));
+      const posTotals = countBy(p => p.position);
+      const t1Total = pool.filter(p => p.tier === 1).length;
+
+      const candidates = [];
+      let bestCost = Infinity;
+
+      for (let mask = 0; mask < (1 << n); mask++) {
+        let bits = 0;
+        for (let m = mask; m; m &= m - 1) bits++;
+        if (bits !== sizeA) continue;
+
+        const lineA = {};
+        const posA = {};
+        let strengthA = 0;
+        let t1A = 0;
+        for (let i = 0; i < n; i++) {
+          if (!(mask & (1 << i))) continue;
+          const p = pool[i];
+          const line = getPositionLine(p.position);
+          lineA[line] = (lineA[line] || 0) + 1;
+          posA[p.position] = (posA[p.position] || 0) + 1;
+          strengthA += strength[i];
+          if (p.tier === 1) t1A++;
+        }
+
+        const diff = (totals, partA, key) => Math.abs(2 * (partA[key] || 0) - totals[key]);
+        const gkDiff = diff(lineTotals, lineA, 'GK') || 0;
+        const lineDiff = ['DEF', 'MID', 'ATT'].reduce((s, k) => s + (lineTotals[k] ? diff(lineTotals, lineA, k) : 0), 0);
+        const posDiff = Object.keys(posTotals).reduce((s, k) => s + diff(posTotals, posA, k), 0);
+        const skillDiff = Math.abs(2 * strengthA - totalStrength);
+        const t1Diff = Math.abs(2 * t1A - t1Total);
+
+        const cost = gkDiff * 1e6 + lineDiff * 1e4 + skillDiff * 20 + posDiff * 30 + t1Diff * 15;
+        candidates.push({ mask, cost });
+        if (cost < bestCost) bestCost = cost;
+      }
+
+      // Pick randomly among near-best splits so regenerating gives variety without losing balance.
+      const shortlist = candidates.filter(c => c.cost <= bestCost + 15);
+      const { mask } = shortlist[Math.floor(Math.random() * shortlist.length)];
+      let teamA = pool.filter((_, i) => mask & (1 << i));
+      let teamB = pool.filter((_, i) => !(mask & (1 << i)));
+      if (Math.random() < 0.5) [teamA, teamB] = [teamB, teamA];
+      return { teamA, teamB };
     }
 
     function assignBenchTeams(benchPool) {
@@ -1987,8 +2206,6 @@
       const yellowSelect = document.getElementById('selectYellowGoalscorer');
       const redOwnSelect = document.getElementById('selectRedOwnGoalscorer');
       const yellowOwnSelect = document.getElementById('selectYellowOwnGoalscorer');
-      const redAssistSelect = document.getElementById('selectRedAssist');
-      const yellowAssistSelect = document.getElementById('selectYellowAssist');
       const redPlayers = getMatchTeamPlayers('red');
       const yellowPlayers = getMatchTeamPlayers('yellow');
 
@@ -2011,40 +2228,6 @@
       redPlayers.forEach(p => {
         yellowOwnSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
       });
-
-      redAssistSelect.innerHTML = '<option value="">Select Red Player...</option>';
-      redPlayers.forEach(p => {
-        redAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
-      });
-
-      yellowAssistSelect.innerHTML = '<option value="">Select Yellow Player...</option>';
-      yellowPlayers.forEach(p => {
-        yellowAssistSelect.innerHTML += `<option value="${p.name}">${p.name} (${p.position})</option>`;
-      });
-    }
-
-    function addAssist(team) {
-      if (!isAdmin) return;
-      const selectId = team === 'red' ? 'selectRedAssist' : 'selectYellowAssist';
-      const val = document.getElementById(selectId).value;
-      if (!val) return;
-
-      if (team === 'red') {
-        redAssists.push(val);
-      } else {
-        yellowAssists.push(val);
-      }
-      renderGoalscorers();
-    }
-
-    function removeAssist(team, index) {
-      if (!isAdmin) return;
-      if (team === 'red') {
-        redAssists.splice(index, 1);
-      } else {
-        yellowAssists.splice(index, 1);
-      }
-      renderGoalscorers();
     }
 
     function addGoalscorer(team) {
@@ -2123,28 +2306,6 @@
           ${isAdmin ? `<button onclick="removeOwnGoalscorer('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
         </span>
       `).join('');
-
-      renderAssists();
-    }
-
-    function renderAssists() {
-      const redContainer = document.getElementById('redAssistsList');
-      const yellowContainer = document.getElementById('yellowAssistsList');
-      if (!redContainer || !yellowContainer) return;
-
-      redContainer.innerHTML = redAssists.map((name, idx) => `
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-red-950/50 border border-red-800/40 text-red-200 text-[11px] font-bold">
-          👟 ${name}
-          ${isAdmin ? `<button onclick="removeAssist('red', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
-        </span>
-      `).join('');
-
-      yellowContainer.innerHTML = yellowAssists.map((name, idx) => `
-        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-950/50 border border-amber-800/40 text-amber-200 text-[11px] font-bold">
-          👟 ${name}
-          ${isAdmin ? `<button onclick="removeAssist('yellow', ${idx})" class="hover:text-white font-black ml-1">×</button>` : ''}
-        </span>
-      `).join('');
     }
 
     function normalizePlayerName(name) {
@@ -2169,7 +2330,6 @@
         p.losses = p.baseLosses || 0;
         p.draws = p.baseDraws || 0;
         p.goals = p.baseGoals || 0;
-        p.assists = p.baseAssists || 0;
         p.ownGoals = p.baseOwnGoals || 0;
         p.gf = p.baseGf || 0;
         p.ga = p.baseGa || 0;
@@ -2194,13 +2354,10 @@
             if (m.scoreRed < m.scoreYellow) p.losses += 1;
             if (m.scoreRed === m.scoreYellow) p.draws += 1;
             const indivGoals = countPlayerGoals(m.redGoals || [], p.name);
-            const indivAssists = countPlayerGoals(m.redAssists || [], p.name);
             p.goals += indivGoals;
-            p.assists += indivAssists;
             p.points += calculateMatchPoints({
               position: p.position,
               goals: indivGoals,
-              assists: indivAssists,
               ownGoals: matchOwnGoals,
               conceded: m.scoreYellow,
               result: m.scoreRed > m.scoreYellow ? 'win' : m.scoreRed === m.scoreYellow ? 'draw' : 'loss'
@@ -2213,13 +2370,10 @@
             if (m.scoreYellow < m.scoreRed) p.losses += 1;
             if (m.scoreYellow === m.scoreRed) p.draws += 1;
             const indivGoals = countPlayerGoals(m.yellowGoals || [], p.name);
-            const indivAssists = countPlayerGoals(m.yellowAssists || [], p.name);
             p.goals += indivGoals;
-            p.assists += indivAssists;
             p.points += calculateMatchPoints({
               position: p.position,
               goals: indivGoals,
-              assists: indivAssists,
               ownGoals: matchOwnGoals,
               conceded: m.scoreRed,
               result: m.scoreYellow > m.scoreRed ? 'win' : m.scoreYellow === m.scoreRed ? 'draw' : 'loss'
@@ -2268,6 +2422,7 @@
 
     function renderPlayerHistory() {
       recalculatePlayerStats();
+      renderMonthlyBestPerformers();
 
       const tbody = document.getElementById('playerHistoryTableBody');
       if (!tbody) return;
@@ -2295,7 +2450,7 @@
         });
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="14" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="13" class="py-6 text-center text-xs text-slate-500">No matching player stats found</td></tr>';
         return;
       }
 
@@ -2305,7 +2460,6 @@
         const losses = p.losses || 0;
         const draws = p.draws || 0;
         const goals = p.goals || 0;
-        const assists = p.assists || 0;
         const ownGoals = p.ownGoals || 0;
         const gf = p.gf || 0;
         const ga = p.ga || 0;
@@ -2331,7 +2485,6 @@
           <td class="py-2.5 px-3 text-center font-mono text-slate-300 font-bold">${draws}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-400 font-bold">${losses}</td>
           <td class="py-2.5 px-3 text-center font-mono text-amber-400 font-black border-l border-slate-800/40">${goals}</td>
-          <td class="py-2.5 px-3 text-center font-mono text-sky-400 font-black">${assists}</td>
           <td class="py-2.5 px-3 text-center font-mono text-red-300 font-black">${ownGoals}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-300 border-l border-slate-800/40">${gf}</td>
           <td class="py-2.5 px-3 text-center font-mono text-slate-400">${ga}</td>
@@ -2353,7 +2506,7 @@
     }
 
     function getMatchStatsForPlayer(name) {
-      const stats = { mp: 0, wins: 0, losses: 0, draws: 0, goals: 0, assists: 0, ownGoals: 0, gf: 0, ga: 0, points: 0 };
+      const stats = { mp: 0, wins: 0, losses: 0, draws: 0, goals: 0, ownGoals: 0, gf: 0, ga: 0, points: 0 };
       const player = players.find(p => normalizePlayerName(p.name) === normalizePlayerName(name));
       const position = player ? player.position : 'ATT';
 
@@ -2371,13 +2524,10 @@
           if (m.scoreRed < m.scoreYellow) stats.losses += 1;
           if (m.scoreRed === m.scoreYellow) stats.draws += 1;
           const indivGoals = countPlayerGoals(m.redGoals || [], name);
-          const indivAssists = countPlayerGoals(m.redAssists || [], name);
           stats.goals += indivGoals;
-          stats.assists += indivAssists;
           stats.points += calculateMatchPoints({
             position,
             goals: indivGoals,
-            assists: indivAssists,
             ownGoals: matchOwnGoals,
             conceded: m.scoreYellow,
             result: m.scoreRed > m.scoreYellow ? 'win' : m.scoreRed === m.scoreYellow ? 'draw' : 'loss'
@@ -2390,13 +2540,10 @@
           if (m.scoreYellow < m.scoreRed) stats.losses += 1;
           if (m.scoreYellow === m.scoreRed) stats.draws += 1;
           const indivGoals = countPlayerGoals(m.yellowGoals || [], name);
-          const indivAssists = countPlayerGoals(m.yellowAssists || [], name);
           stats.goals += indivGoals;
-          stats.assists += indivAssists;
           stats.points += calculateMatchPoints({
             position,
             goals: indivGoals,
-            assists: indivAssists,
             ownGoals: matchOwnGoals,
             conceded: m.scoreRed,
             result: m.scoreYellow > m.scoreRed ? 'win' : m.scoreYellow === m.scoreRed ? 'draw' : 'loss'
@@ -2442,10 +2589,6 @@
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Indiv Goals</label>
               <input type="number" min="0" value="${p.goals || 0}" onchange="updatePlayerStatVal('${p.id}', 'goals', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-amber-400 font-mono text-xs focus:outline-none">
-            </div>
-            <div>
-              <label class="text-[10px] text-slate-400 block font-bold truncate">Assists (A)</label>
-              <input type="number" min="0" value="${p.assists || 0}" onchange="updatePlayerStatVal('${p.id}', 'assists', this.value)" class="w-full px-2 py-1 bg-slate-950 border border-slate-800 rounded text-sky-400 font-mono text-xs focus:outline-none">
             </div>
             <div>
               <label class="text-[10px] text-slate-400 block font-bold truncate">Own Goals</label>
@@ -2516,6 +2659,7 @@
       const matchRecord = {
         id: Date.now().toString(),
         date: selectedMatchDate,
+        time: isValidTime(selectedMatchTime) ? selectedMatchTime : '',
         scoreRed: scoreRed,
         scoreYellow: scoreYellow,
         teamRed: sortPlayersByPosition(getMatchTeamPlayers('red')).map(p => p.name),
@@ -2523,9 +2667,7 @@
         redGoals: [...redGoalscorers],
         yellowGoals: [...yellowGoalscorers],
         redOwnGoals: [...redOwnGoalscorers],
-        yellowOwnGoals: [...yellowOwnGoalscorers],
-        redAssists: [...redAssists],
-        yellowAssists: [...yellowAssists]
+        yellowOwnGoals: [...yellowOwnGoalscorers]
       };
 
       matchHistory.unshift(matchRecord);
@@ -2541,8 +2683,6 @@
       yellowGoalscorers = [];
       redOwnGoalscorers = [];
       yellowOwnGoalscorers = [];
-      redAssists = [];
-      yellowAssists = [];
       document.getElementById('scoreDisplayRed').textContent = '0';
       document.getElementById('scoreDisplayYellow').textContent = '0';
       renderGoalscorers();
@@ -2566,14 +2706,12 @@
         const yellowGoalsStr = (m.yellowGoals || []).length > 0 ? (m.yellowGoals || []).join(', ') : 'None';
         const redOwnGoalsStr = (m.redOwnGoals || []).length > 0 ? (m.redOwnGoals || []).join(', ') : 'None';
         const yellowOwnGoalsStr = (m.yellowOwnGoals || []).length > 0 ? (m.yellowOwnGoals || []).join(', ') : 'None';
-        const redAssistsStr = (m.redAssists || []).length > 0 ? (m.redAssists || []).join(', ') : 'None';
-        const yellowAssistsStr = (m.yellowAssists || []).length > 0 ? (m.yellowAssists || []).join(', ') : 'None';
         const redTeamStr = (m.teamRed || []).length > 0 ? (m.teamRed || []).join(', ') : 'None';
         const yellowTeamStr = (m.teamYellow || []).length > 0 ? (m.teamYellow || []).join(', ') : 'None';
 
         item.innerHTML = `
           <div class="flex items-center justify-between text-xs border-b border-slate-800 pb-2">
-            <span class="font-mono text-amber-400 font-bold">📅 ${m.date || 'Unknown Date'}</span>
+            <span class="font-mono text-amber-400 font-bold">📅 ${m.date || 'Unknown Date'}${formatMatchTime(m.time) ? ` · ${formatMatchTime(m.time)}` : ''}</span>
             <div class="flex items-center gap-2">
               <span class="text-slate-400 font-mono">Match #${matchHistory.length - idx}</span>
               ${isAdmin ? `<button onclick="deleteMatchFromHistory('${m.id}')" class="text-red-400 hover:text-red-300 font-bold ml-2 text-xs">Delete</button>` : ''}
@@ -2593,8 +2731,6 @@
             <div><strong class="text-amber-400">Yellow Team:</strong> ${yellowTeamStr}</div>
             <div><strong class="text-red-400">Red Scored:</strong> ${redGoalsStr}</div>
             <div><strong class="text-amber-400">Yellow Scored:</strong> ${yellowGoalsStr}</div>
-            <div><strong class="text-sky-400">Red Assists:</strong> ${redAssistsStr}</div>
-            <div><strong class="text-sky-300">Yellow Assists:</strong> ${yellowAssistsStr}</div>
             <div><strong class="text-red-300">Red Own Goals:</strong> ${redOwnGoalsStr}</div>
             <div><strong class="text-amber-300">Yellow Own Goals:</strong> ${yellowOwnGoalsStr}</div>
           </div>
@@ -2621,6 +2757,184 @@
         renderMatchHistory();
         renderPlayerHistory();
       }
+    }
+
+    /* PLAYER OF THE MONTH — position-adjusted points per match */
+    const MONTHLY_MIN_APPEARANCES = 2;
+
+    function getPlayerMatchEntry(match, player) {
+      const inRed = matchIncludesPlayer(match.teamRed || [], player.name);
+      const inYellow = !inRed && matchIncludesPlayer(match.teamYellow || [], player.name);
+      if (!inRed && !inYellow) return null;
+
+      const scored = Number(inRed ? match.scoreRed : match.scoreYellow) || 0;
+      const conceded = Number(inRed ? match.scoreYellow : match.scoreRed) || 0;
+      const teamGoals = inRed ? (match.redGoals || []) : (match.yellowGoals || []);
+      const goals = countPlayerGoals(teamGoals, player.name);
+      const ownGoals = countPlayerGoals(match.redOwnGoals || [], player.name)
+        + countPlayerGoals(match.yellowOwnGoals || [], player.name);
+      const result = scored > conceded ? 'win' : scored === conceded ? 'draw' : 'loss';
+
+      return {
+        points: calculateMatchPoints({ position: player.position, goals, ownGoals, conceded, result })
+      };
+    }
+
+    function rankPlayersForMonth(records, baselineFor) {
+      const rows = records
+        .filter(r => r.appearances >= MONTHLY_MIN_APPEARANCES)
+        .map(r => ({
+          player: r.player,
+          appearances: r.appearances,
+          points: r.points,
+          ppa: r.points / r.appearances,
+          group: getPointsPositionGroup(r.player.position)
+        }));
+      if (rows.length === 0) return [];
+
+      const mean = values => values.reduce((sum, v) => sum + v, 0) / values.length;
+
+      rows.forEach(r => {
+        r.baseline = baselineFor(r.group);
+        r.residual = r.ppa - r.baseline;
+      });
+
+      // Scale by the population standard deviation of residuals; fall back to 1 when undefined or zero.
+      const spread = Math.sqrt(mean(rows.map(r => r.residual ** 2)));
+      const scale = spread > 0 ? spread : 1;
+      rows.forEach(r => { r.score = r.residual / scale; });
+
+      return rows.sort((a, b) =>
+        (b.score - a.score)
+        || (b.ppa - a.ppa)
+        || (b.appearances - a.appearances)
+        || a.player.name.localeCompare(b.player.name)
+      );
+    }
+
+    function computeMonthlyBestPerformers() {
+      const monthBuckets = new Map();   // monthKey -> Map(normalized name -> record)
+      const monthGroupTotals = new Map(); // monthKey -> Map(group -> { points, appearances })
+
+      matchHistory.forEach(match => {
+        const monthKey = typeof match.date === 'string' ? match.date.slice(0, 7) : '';
+        if (!/^\d{4}-\d{2}$/.test(monthKey)) return;
+        if (!monthBuckets.has(monthKey)) {
+          monthBuckets.set(monthKey, new Map());
+          monthGroupTotals.set(monthKey, new Map());
+        }
+        const bucket = monthBuckets.get(monthKey);
+        const groupTotals = monthGroupTotals.get(monthKey);
+
+        players.forEach(player => {
+          const entry = getPlayerMatchEntry(match, player);
+          if (!entry) return;
+
+          const group = getPointsPositionGroup(player.position);
+          const total = groupTotals.get(group) || { points: 0, appearances: 0 };
+          total.points += entry.points;
+          total.appearances += 1;
+          groupTotals.set(group, total);
+
+          const key = normalizePlayerName(player.name);
+          const record = bucket.get(key) || { player, appearances: 0, points: 0 };
+          record.appearances += 1;
+          record.points += entry.points;
+          bucket.set(key, record);
+        });
+      });
+
+      // Position baselines are cumulative up to and including each month, so a finished
+      // month never changes when matches from later months are recorded.
+      // Only finished months: the current month is still in progress, so it is excluded.
+      const currentMonth = getLocalDate().slice(0, 7);
+      const monthKeys = [...monthBuckets.keys()].filter(k => k < currentMonth).sort();
+      const cumulative = new Map();
+      const rankingByMonth = new Map();
+
+      monthKeys.forEach(monthKey => {
+        monthGroupTotals.get(monthKey).forEach((t, group) => {
+          const c = cumulative.get(group) || { points: 0, appearances: 0 };
+          c.points += t.points;
+          c.appearances += t.appearances;
+          cumulative.set(group, c);
+        });
+
+        const baselineFor = group => {
+          const c = cumulative.get(group);
+          return c && c.appearances > 0 ? c.points / c.appearances : 0;
+        };
+        rankingByMonth.set(monthKey, rankPlayersForMonth([...monthBuckets.get(monthKey).values()], baselineFor));
+      });
+
+      return monthKeys.slice().reverse().map(month => ({ month, ranking: rankingByMonth.get(month) }));
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function formatMonthLabel(monthKey) {
+      return new Date(`${monthKey}-01T00:00:00`).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+
+    function formatPositionScore(score) {
+      return `${score >= 0 ? '+' : ''}${score.toFixed(2)}`;
+    }
+
+    function renderMonthlyBestPerformers() {
+      const container = document.getElementById('monthlyBestContainer');
+      if (!container) return;
+
+      const months = computeMonthlyBestPerformers();
+      if (months.length === 0) {
+        container.innerHTML = '<div class="p-4 text-center text-xs text-slate-500 sm:col-span-2">No finished months with match records yet.</div>';
+        return;
+      }
+
+      container.innerHTML = months.map(({ month, ranking }) => {
+        const label = formatMonthLabel(month);
+        if (ranking.length === 0) {
+          return `
+            <div class="glass-card rounded-xl p-3 sm:p-4 border border-slate-800">
+              <div class="font-mono text-amber-400 font-bold text-xs">${label}</div>
+              <p class="pt-2 text-xs text-slate-500">No player reached ${MONTHLY_MIN_APPEARANCES} matches this month.</p>
+            </div>`;
+        }
+
+        const [winner, ...others] = ranking;
+        const displayName = r => escapeHtml(r.player.name.trim());
+        const runnersUp = others.slice(0, 2).map(r => `
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="text-slate-300">${displayName(r)} <span class="text-slate-500 font-mono">(${escapeHtml(r.player.position)})</span></span>
+            <span class="font-mono text-slate-400">${formatPositionScore(r.score)}</span>
+          </div>`).join('');
+
+        return `
+          <div class="glass-card rounded-xl p-3 sm:p-4 border border-amber-500/30 space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-mono text-amber-400 font-bold">📅 ${label}</span>
+              <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-black uppercase tracking-wider">Winner</span>
+            </div>
+            <div class="flex items-end justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-lg font-black text-white truncate">${displayName(winner)}</div>
+                <div class="text-[11px] text-slate-400">${escapeHtml(POSITION_LABELS[winner.player.position] || winner.player.position)}</div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="font-mono text-2xl font-black text-amber-300">${formatPositionScore(winner.score)}</div>
+                <div class="text-[10px] text-slate-500 uppercase tracking-wider">Position score</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-4 gap-2 text-center font-mono text-[11px] pt-2 border-t border-slate-800/60">
+              <div><div class="text-slate-100 font-bold">${winner.ppa.toFixed(2)}</div><div class="text-[9px] text-slate-500 uppercase">Pts/match</div></div>
+              <div><div class="text-slate-300 font-bold">${winner.baseline.toFixed(2)}</div><div class="text-[9px] text-slate-500 uppercase">Pos avg</div></div>
+              <div><div class="text-slate-100 font-bold">${winner.appearances}</div><div class="text-[9px] text-slate-500 uppercase">Matches</div></div>
+              <div><div class="text-slate-100 font-bold">${winner.points}</div><div class="text-[9px] text-slate-500 uppercase">Points</div></div>
+            </div>
+            ${runnersUp ? `<div class="space-y-1 pt-2 border-t border-slate-800/60"><div class="text-[9px] text-slate-500 uppercase tracking-wider">Next best</div>${runnersUp}</div>` : ''}
+          </div>`;
+      }).join('');
     }
 
     /* ROSTER MODAL MATRIX RENDERER */
@@ -2671,7 +2985,6 @@
                 <input type="date" aria-label="Expected return for ${p.name}" min="${isValidDate(p.injuryFrom) ? p.injuryFrom : ''}" value="${isValidDate(p.expectedReturn) ? p.expectedReturn : ''}" onchange="updatePlayerInjury('${p.id}', 'expectedReturn', this.value)" class="block w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-slate-200 [color-scheme:dark]">
               </label>
               <button onclick="updatePlayerInjury('${p.id}', 'injured', false)" class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-300 font-bold">Mark fit</button>
-              <p class="w-full text-[11px] text-slate-400">Return date is an estimate only. Mark fit to allow selection again.</p>
             ` : ''}
           </div>
         `;
@@ -2748,7 +3061,6 @@
         baseLosses: 0,
         baseDraws: 0,
         baseGoals: 0,
-        baseAssists: 0,
         baseOwnGoals: 0,
         baseGf: 0,
         baseGa: 0,
@@ -2817,7 +3129,7 @@
         ? sortPlayersByPosition(bench).map(p => `• ${p.name} (${p.position})`).join('\n')
         : '• None';
 
-      const exportText = `⚽ *UFC MYSORE MATCHDAY LINEUP* ⚽\n📅 Date: ${selectedMatchDate}\n\n🔴 *UFC MYSORE RED*\n${redNames}\n\n🟡 *UFC MYSORE YELLOW*\n${yellowNames}\n\n🔄 *SUBSTITUTES / BENCH*\n${benchNames}`;
+      const exportText = `⚽ *UFC MYSORE MATCHDAY LINEUP* ⚽\n📅 Date: ${selectedMatchDate}${formatMatchTime(selectedMatchTime) ? ` · ${formatMatchTime(selectedMatchTime)}` : ''}\n\n🔴 *UFC MYSORE RED*\n${redNames}\n\n🟡 *UFC MYSORE YELLOW*\n${yellowNames}\n\n🔄 *SUBSTITUTES / BENCH*\n${benchNames}`;
 
       document.getElementById('exportTextarea').value = exportText;
       document.getElementById('exportModal').classList.remove('hidden');
